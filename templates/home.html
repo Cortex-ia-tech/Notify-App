@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>CodNotify - Home</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Bem-vindo ao CodNotify</h1>
+    <p>Este será seu painel de controle para gerenciar as licenças.</p>
+
+    <div class="quadro">
+    <h2>Licenças a vencer</h2>
+    {% if a_vencer %}
+        <ul>
+        {% for nome, data in a_vencer %}
+            <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhuma licença a vencer.</p>
+    {% endif %}
+    </div>
+
+    <div class="quadro">
+    <h2>Licenças vencidas</h2>
+    {% if vencidas %}
+        <ul>
+        {% for nome, data in vencidas %}
+            <li>{{ nome }} - venceu em {{ data.strftime('%d/%m/%Y') }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhuma licença vencida.</p>
+    {% endif %}
+    </div>
+
+        <footer style="text-align: center; margin-top: 50px;">
+        <p style="font-size: 15px; color: #686868;">
+            SkyNotify 2025 – Desenvolvido por SkyNet Business Automation ® <br> Todos os direitos reservados.
+        </p>
+    </footer>
+
+
+
+</body>
+</html>
