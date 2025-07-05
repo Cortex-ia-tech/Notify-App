@@ -4,10 +4,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 
-# Dados de login
+# Dados do remetente
 remetente = "leonardomoreira@petroserra.com"
 senha_app = "obdf ilkz cpcj hbfn"
-destinatario = "leonardomoreira@petroserra.com"  # pode ser ajustado por usuário futuramente
+destinatario = "leonardomoreira@petroserra.com"
 
 # Conectar ao banco
 conn = sqlite3.connect('database.db')
@@ -23,23 +23,23 @@ for nome, vencimento, dias_antes in licencas:
     data_alerta = data_venc - timedelta(days=int(dias_antes))
 
     if data_alerta <= hoje <= data_venc:
-        # Criar o e-mail específico para essa licença
         mensagem = MIMEMultipart()
         mensagem["From"] = remetente
         mensagem["To"] = destinatario
         mensagem["Subject"] = f"⚠️ Lembrete: {nome} vence em {data_venc.strftime('%d/%m/%Y')}"
 
         corpo = f"""
-Atenção!
+Olá,
 
+Esta é uma notificação automática do sistema SkyNotify.
 
-A licença "{nome}" está vence em {data_venc.strftime('%d/%m/%Y')}.
+A licença "{nome}" está próxima do vencimento (vence em {data_venc.strftime('%d/%m/%Y')}).
+Você optou por receber lembretes a partir de {dias_antes} dias antes.
 
+Acesse o SkyNotify para atualizar essa licença.
 
-Acesse o Skynet Notify para atualizar ou renovar a licença.
-
-Atenciosamente,
-CodNotify
+Att,
+SkyNotify | SkyNet Business Automation
 """
         mensagem.attach(MIMEText(corpo, "plain"))
 
@@ -52,5 +52,3 @@ CodNotify
             print(f"E-mail enviado para licença: {nome}")
         except Exception as e:
             print(f"Erro ao enviar e-mail para {nome}:", e)
-    else:
-        print(f"Hoje não é dia de enviar aviso para: {nome}")
