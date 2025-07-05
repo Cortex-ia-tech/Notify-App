@@ -4,25 +4,38 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 
-# Dados do remetente
+# Configurações
 remetente = "leonardomoreira@petroserra.com"
 senha_app = "obdf ilkz cpcj hbfn"
 destinatario = "leonardomoreira@petroserra.com"
 
-# Conectar ao banco
-conn = sqlite3.connect('database.db')
-c = conn.cursor()
-c.execute('SELECT nome, vencimento, dias_antes FROM licencas')
-licencas = c.fetchall()
-conn.close()
-
 hoje = datetime.now().date()
 
-for nome, vencimento, dias_antes in licencas:
+# Conecta ao banco
+conn = sqlite3.connect('database.db')
+c = conn.cursor()
+
+# Garante que a coluna existe
+c.execute("PRAGMA table_info(licencas)")
+colunas = [linha[1] for linha in c.fetchall()]
+if "ultimo_envio" not in colunas:
+    c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
+
+# Busca as licenças
+c.execute('SELECT id, nome, vencimento, dias_antes, ultimo_envio FROM licencas')
+licencas = c.fetchall()
+
+for id_, nome, vencimento, dias_antes, ultimo_envio in licencas:
     data_venc = datetime.strptime(vencimento, '%Y-%m-%d').date()
     data_alerta = data_venc - timedelta(days=int(dias_antes))
 
     if data_alerta <= hoje <= data_venc:
+        # Verifica se já foi enviado hoje
+        if ultimo_envio == str(hoje):
+            print(f"E-mail já enviado hoje para: {nome}")
+            continue
+
+        # Monta o e-mail
         mensagem = MIMEMultipart()
         mensagem["From"] = remetente
         mensagem["To"] = destinatario
@@ -50,5 +63,12 @@ SkyNotify | SkyNet Business Automation
             servidor.sendmail(remetente, destinatario, mensagem.as_string())
             servidor.quit()
             print(f"E-mail enviado para licença: {nome}")
+
+            # Atualiza o campo ultimo_envio no banco
+            c.execute("UPDATE licencas SET ultimo_envio = ? WHERE id = ?", (str(hoje), id_))
+            conn.commit()
+
         except Exception as e:
             print(f"Erro ao enviar e-mail para {nome}:", e)
+
+conn.close()
