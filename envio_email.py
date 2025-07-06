@@ -13,7 +13,7 @@ destinatario = "leonardomoreira@petroserra.com"
 hoje = datetime.now().date()
 
 # Arquivo persistente com os códigos dos e-mails enviados
-ARQUIVO_ENVIADOS = 'emails_enviados.txt'
+ARQUIVO_ENVIADOS = 'persist/emails_enviados.txt'
 
 # Garante que o arquivo existe
 if not os.path.exists(ARQUIVO_ENVIADOS):
