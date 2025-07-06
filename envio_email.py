@@ -1,46 +1,56 @@
 import smtplib
 import sqlite3
+import os
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime, timedelta
 
-# Configurações
+# ========= CONFIGURAÇÕES =========
 remetente = "leonardomoreira@petroserra.com"
 senha_app = "obdf ilkz cpcj hbfn"
 destinatario = "leonardomoreira@petroserra.com"
+CAMINHO_CONTROLE = "/tmp/emails_enviados.txt"
+
+# ========= FUNÇÃO PARA GERAR O CÓDIGO =========
+def gerar_codigo_envio(id_licenca):
+    hoje = datetime.now()
+    lll = str(id_licenca).zfill(3)
+    dd = str(hoje.day).zfill(2)
+    mm = str(hoje.month).zfill(2)
+    yyyy = str(hoje.year)
+    return f"{lll}{dd}{mm}{yyyy}"
+
+# ========= GARANTE QUE O ARQUIVO EXISTA =========
+if not os.path.exists(CAMINHO_CONTROLE):
+    with open(CAMINHO_CONTROLE, "w") as f:
+        pass
+
+# ========= LÊ OS CÓDIGOS JÁ ENVIADOS =========
+with open(CAMINHO_CONTROLE, "r") as f:
+    codigos_enviados = set(f.read().splitlines())
+
+# ========= CONEXÃO COM O BANCO =========
+conn = sqlite3.connect('database.db')
+c = conn.cursor()
+c.execute('SELECT id, nome, vencimento, dias_antes FROM licencas')
+licencas = c.fetchall()
 
 hoje = datetime.now().date()
 
-# Conecta ao banco
-conn = sqlite3.connect('database.db')
-c = conn.cursor()
-
-# Garante que a coluna existe
-c.execute("PRAGMA table_info(licencas)")
-colunas = [linha[1] for linha in c.fetchall()]
-if "ultimo_envio" not in colunas:
-    c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
-
-# Busca as licenças
-c.execute('SELECT id, nome, vencimento, dias_antes, ultimo_envio FROM licencas')
-licencas = c.fetchall()
-
-for id_, nome, vencimento, dias_antes, ultimo_envio in licencas:
+for id_, nome, vencimento, dias_antes in licencas:
     data_venc = datetime.strptime(vencimento, '%Y-%m-%d').date()
     data_alerta = data_venc - timedelta(days=int(dias_antes))
 
-    if data_alerta <= hoje <= data_venc:
-        # Verifica se já foi enviado hoje
-        if ultimo_envio is not None:
-            try:
-                data_ultimo_envio = datetime.strptime(ultimo_envio, "%Y-%m-%d").date()
-                if data_ultimo_envio == hoje:
-                    print(f"E-mail já enviado hoje para: {nome}")
-                    continue
-            except Exception as e:
-                print(f"Erro ao analisar data de envio anterior ({ultimo_envio}): {e}")
+    # Gera o código de controle
+    codigo_envio = gerar_codigo_envio(id_)
 
-        # Monta o e-mail
+    # Verifica se já foi enviado
+    if codigo_envio in codigos_enviados:
+        print(f"⚠️ E-mail já enviado hoje para: {nome} ({codigo_envio})")
+        continue
+
+    # Se estiver no período de alerta, envia
+    if data_alerta <= hoje <= data_venc:
         mensagem = MIMEMultipart()
         mensagem["From"] = remetente
         mensagem["To"] = destinatario
@@ -51,7 +61,7 @@ Olá,
 
 Esta é uma notificação automática do sistema SkyNotify.
 
-A licença "{nome}" está próxima do vencimento (vence em {data_venc.strftime('%d/%m/%Y')}). 
+A licença "{nome}" está próxima do vencimento (vence em {data_venc.strftime('%d/%m/%Y')}).
 Você optou por receber lembretes a partir de {dias_antes} dias antes.
 
 Acesse o SkyNotify para atualizar essa licença.
@@ -67,13 +77,14 @@ SkyNotify | SkyNet Business Automation
             servidor.login(remetente, senha_app)
             servidor.sendmail(remetente, destinatario, mensagem.as_string())
             servidor.quit()
-            print(f"E-mail enviado para licença: {nome}")
 
-            # Atualiza o campo ultimo_envio no banco
-            c.execute("UPDATE licencas SET ultimo_envio = ? WHERE id = ?", (str(hoje), id_))
-            conn.commit()
+            print(f"✅ E-mail enviado para: {nome} ({codigo_envio})")
+
+            # Registra o código como já enviado
+            with open(CAMINHO_CONTROLE, "a") as f:
+                f.write(codigo_envio + "\n")
 
         except Exception as e:
-            print(f"Erro ao enviar e-mail para {nome}:", e)
+            print(f"❌ Erro ao enviar e-mail para {nome}:", e)
 
 conn.close()
