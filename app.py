@@ -78,7 +78,7 @@ def listar_licencas():
         return html
     
     except Exception as e:
-        return f"<p><strong>Erro:</strong> {e}</p>"
+        return f"<h2>Erro interno</h2><p>{str(e)}</p>"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
