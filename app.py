@@ -14,9 +14,18 @@ def criar_tabela():
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
             dias_antes INTEGER NOT NULL,
-            ultimo_envio DATE
+            
         )
     ''')
+
+    # Verifica e adiciona a coluna 'ultimo_envio' se não existir
+    c.execute("PRAGMA table_info(licencas)")
+    colunas = [linha[1] for linha in c.fetchall()]
+    if "ultimo_envio" not in colunas:
+        c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
+
+
+
     conn.commit()
     conn.close()
 
