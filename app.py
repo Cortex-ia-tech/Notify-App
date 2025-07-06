@@ -86,15 +86,29 @@ def cadastrar():
 
 
 
-@app.route('/registrar')
+@app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
-    return "<h1>Teste: página registrar funcionando</h1>"
+    if request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        senha = request.form['senha']
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        try:
+            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)', (nome, email, senha))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            conn.close()
+            return "Este e-mail já está cadastrado."
+        conn.close()
+
+        return redirect('/')
+    
+    return render_template('registrar.html')
 
 
 criar_tabela()
-
-print("Reimplantando app com rota /registrar")
-
 
 #if __name__ == '__main__':
     #app.run(host='0.0.0.0', port=10000)
