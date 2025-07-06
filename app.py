@@ -65,15 +65,7 @@ def cadastrar():
     
     return render_template('cadastrar.html')
 
-@app.route('/listar')
-def listar():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT id, nome, vencimento, dias_antes, ultimo_envio FROM licencas")
-    licencas = c.fetchall()
-    conn.close()
-    return render_template("listar.html", licencas=licencas)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+#if __name__ == '__main__':
+    #app.run(host='0.0.0.0', port=10000)
 
