@@ -74,24 +74,6 @@ def cadastrar():
     
     return render_template('cadastrar.html')
 
-@app.route('/listar')
-def listar_licencas():
-    try:
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
-        c.execute("SELECT id, nome, vencimento, dias_antes, COALESCE(ultimo_envio, '-') FROM licencas")
-        licencas = c.fetchall()
-        conn.close()
-
-        html = "<h2>Licenças Cadastradas</h2><ul>"
-        for lic in licencas:
-            html += f"<li>ID: {lic[0]} | Nome: {lic[1]} | Vencimento: {lic[2]} | Dias antes: {lic[3]} | Último envio: {lic[4]}</li>"
-        html += "</ul>"
-        return html
-    
-    except Exception as e:
-        return f"<h2>Erro interno</h2><p>{str(e)}</p>"
-
-#if __name__ == '__main__':
-    #app.run(host='0.0.0.0', port=10000)
+if __name__ == '__main__':
+    app.run(debug=True)
 
