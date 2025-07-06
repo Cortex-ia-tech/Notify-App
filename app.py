@@ -9,7 +9,7 @@ def criar_tabela():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     
-    # Cria a tabela básica, sem a coluna 'ultimo_envio'
+    # Cria a tabela se não existir
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,16 +19,13 @@ def criar_tabela():
         )
     ''')
 
-    # Verifica se a coluna 'ultimo_envio' já existe
+    # Garante que a coluna 'ultimo_envio' exista
     c.execute("PRAGMA table_info(licencas)")
     colunas = [coluna[1] for coluna in c.fetchall()]
     if 'ultimo_envio' not in colunas:
-        try:
-            c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
-            print("Coluna 'ultimo_envio' adicionada com sucesso.")
-        except Exception as e:
-            print("Erro ao adicionar coluna:", e)
+        c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
 
+    
     conn.commit()
     conn.close()
 
