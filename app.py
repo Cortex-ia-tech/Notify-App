@@ -8,23 +8,26 @@ app = Flask(__name__)
 def criar_tabela():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
+    
+    # Cria a tabela básica, sem a coluna 'ultimo_envio'
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
-            dias_antes INTEGER NOT NULL,
-            
+            dias_antes INTEGER NOT NULL
         )
     ''')
 
-    # Verifica e adiciona a coluna 'ultimo_envio' se não existir
+    # Verifica se a coluna 'ultimo_envio' já existe
     c.execute("PRAGMA table_info(licencas)")
-    colunas = [linha[1] for linha in c.fetchall()]
-    if "ultimo_envio" not in colunas:
-        c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
-
-
+    colunas = [coluna[1] for coluna in c.fetchall()]
+    if 'ultimo_envio' not in colunas:
+        try:
+            c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
+            print("Coluna 'ultimo_envio' adicionada com sucesso.")
+        except Exception as e:
+            print("Erro ao adicionar coluna:", e)
 
     conn.commit()
     conn.close()
