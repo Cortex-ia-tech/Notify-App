@@ -64,6 +64,8 @@ def home():
 
     return render_template('home.html', a_vencer=a_vencer, vencidas=vencidas)
 
+
+
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
     if request.method == 'POST':
@@ -81,6 +83,31 @@ def cadastrar():
         return redirect('/')
     
     return render_template('cadastrar.html')
+
+
+
+@app.route('/registrar', methods=['GET', 'POST'])
+def registrar():
+    if request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        senha = request.form['senha']
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        try:
+            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)', (nome, email, senha))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            conn.close()
+            return "Este e-mail já está cadastrado."
+        conn.close()
+
+        return redirect('/')
+    
+    return render_template('registrar.html')
+
+
 
 criar_tabela()
 
