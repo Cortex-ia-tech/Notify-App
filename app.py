@@ -15,16 +15,10 @@ def criar_tabela():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
-            dias_antes INTEGER NOT NULL
+            dias_antes INTEGER NOT NULL,
+            ultimo_envio DATE
         )
     ''')
-
-    # Garante que a coluna 'ultimo_envio' exista
-    c.execute("PRAGMA table_info(licencas)")
-    colunas = [coluna[1] for coluna in c.fetchall()]
-    if 'ultimo_envio' not in colunas:
-        c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
-
     
     conn.commit()
     conn.close()
@@ -80,5 +74,6 @@ def listar():
     conn.close()
     return render_template("listar.html", licencas=licencas)
 
-
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)
 
