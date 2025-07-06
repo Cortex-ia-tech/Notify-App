@@ -80,6 +80,6 @@ def listar_licencas():
     except Exception as e:
         return f"<h2>Erro interno</h2><p>{str(e)}</p>"
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+#if __name__ == '__main__':
+    #app.run(host='0.0.0.0', port=10000)
 
