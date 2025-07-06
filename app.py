@@ -108,7 +108,6 @@ def registrar():
     return render_template('registrar.html')
 
 
-
 criar_tabela()
 
 #if __name__ == '__main__':
