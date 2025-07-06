@@ -47,7 +47,7 @@ def criar_tabela():
 def home():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT nome, vencimento FROM licencas')
+    c.execute('SELECT id, nome, vencimento FROM licencas')
     licencas = c.fetchall()
     conn.close()
 
@@ -55,12 +55,12 @@ def home():
     a_vencer = []
     vencidas = []
 
-    for nome, vencimento in licencas:
+    for id_,nome, vencimento in licencas:
         data_venc = datetime.strptime(vencimento, '%Y-%m-%d').date()
         if data_venc >= hoje:
-            a_vencer.append((nome, data_venc))
+            a_vencer.append((id_,nome, data_venc))
         else:
-            vencidas.append((nome, data_venc))
+            vencidas.append((id_,nome, data_venc))
 
     return render_template('home.html', a_vencer=a_vencer, vencidas=vencidas)
 
@@ -106,6 +106,36 @@ def registrar():
         return redirect('/')
     
     return render_template('registrar.html')
+
+
+@app.route('/editar/<int:id>', methods=['GET', 'POST'])
+def editar(id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        nome = request.form['nome']
+        vencimento = request.form['vencimento']
+        dias_antes = request.form['dias_antes']
+
+        c.execute('''
+            UPDATE licencas
+            SET nome = ?, vencimento = ?, dias_antes = ?
+            WHERE id = ?
+        ''', (nome, vencimento, dias_antes, id))
+        conn.commit()
+        conn.close()
+        return redirect('/')
+
+    # Se for GET, busca os dados da licença
+    c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = ?', (id,))
+    licenca = c.fetchone()
+    conn.close()
+
+    if licenca:
+        return render_template('editar.html', id=id, nome=licenca[0], vencimento=licenca[1], dias_antes=licenca[2])
+    else:
+        return "Licença não encontrada"
 
 
 criar_tabela()

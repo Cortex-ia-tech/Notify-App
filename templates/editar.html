@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Licença</title>
+</head>
+<body>
+    <h2>Editar Licença</h2>
+    <form method="POST">
+        <label>Nome:</label><br>
+        <input type="text" name="nome" value="{{ nome }}" required><br><br>
+
+        <label>Vencimento:</label><br>
+        <input type="date" name="vencimento" value="{{ vencimento }}" required><br><br>
+
+        <label>Dias antes para aviso:</label><br>
+        <input type="number" name="dias_antes" value="{{ dias_antes }}" required><br><br>
+
+        <button type="submit">Salvar Alterações</button>
+    </form>
+    <br>
+    <a href="/">Voltar</a>
+</body>
+</html>
