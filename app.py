@@ -86,26 +86,9 @@ def cadastrar():
 
 
 
-@app.route('/registrar', methods=['GET', 'POST'])
+@app.route('/registrar')
 def registrar():
-    if request.method == 'POST':
-        nome = request.form['nome']
-        email = request.form['email']
-        senha = request.form['senha']
-
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
-        try:
-            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)', (nome, email, senha))
-            conn.commit()
-        except sqlite3.IntegrityError:
-            conn.close()
-            return "Este e-mail já está cadastrado."
-        conn.close()
-
-        return redirect('/')
-    
-    return render_template('registrar.html')
+    return "<h1>Teste: página registrar funcionando</h1>"
 
 
 criar_tabela()
