@@ -15,13 +15,13 @@ hoje = datetime.now().date()
 conn = sqlite3.connect('database.db')
 c = conn.cursor()
 
-# Garante que a coluna existe
+# Garante que a coluna 'ultimo_envio' existe
 c.execute("PRAGMA table_info(licencas)")
 colunas = [linha[1] for linha in c.fetchall()]
 if "ultimo_envio" not in colunas:
     c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
 
-# Busca as licenças
+# Busca todas as licenças
 c.execute('SELECT id, nome, vencimento, dias_antes, ultimo_envio FROM licencas')
 licencas = c.fetchall()
 
@@ -29,10 +29,16 @@ for id_, nome, vencimento, dias_antes, ultimo_envio in licencas:
     data_venc = datetime.strptime(vencimento, '%Y-%m-%d').date()
     data_alerta = data_venc - timedelta(days=int(dias_antes))
 
+    # Converte ultimo_envio para date se não for None
+    if ultimo_envio:
+        ultimo_envio_date = datetime.strptime(ultimo_envio, '%Y-%m-%d').date()
+    else:
+        ultimo_envio_date = None
+
+    # Verifica se deve enviar hoje
     if data_alerta <= hoje <= data_venc:
-        # Verifica se já foi enviado hoje
-        if ultimo_envio == str(hoje):
-            print(f"E-mail já enviado hoje para: {nome}")
+        if ultimo_envio_date == hoje:
+            print(f"E-mail já foi enviado hoje para: {nome}")
             continue
 
         # Monta o e-mail
@@ -69,6 +75,6 @@ SkyNotify | SkyNet Business Automation
             conn.commit()
 
         except Exception as e:
-            print(f"Erro ao enviar e-mail para {nome}:", e)
+            print(f"Erro ao enviar e-mail para {nome}: {e}")
 
 conn.close()
