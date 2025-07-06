@@ -64,19 +64,21 @@ def cadastrar():
 
 @app.route('/listar')
 def listar_licencas():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT id, nome, vencimento, dias_antes, ultimo_envio FROM licencas")
-    licencas = c.fetchall()
-    conn.close()
+    try:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute("SELECT id, nome, vencimento, dias_antes, COALESCE(ultimo_envio, '-') FROM licencas")
+        licencas = c.fetchall()
+        conn.close()
 
-    html = "<h2>Licenças Cadastradas</h2><ul>"
-    for lic in licencas:
-        html += f"<li>{lic}</li>"
-    html += "</ul>"
-    return html
-
-
+        html = "<h2>Licenças Cadastradas</h2><ul>"
+        for lic in licencas:
+            html += f"<li>ID: {lic[0]} | Nome: {lic[1]} | Vencimento: {lic[2]} | Dias antes: {lic[3]} | Último envio: {lic[4]}</li>"
+        html += "</ul>"
+        return html
+    
+    except Exception as e:
+        return f"<p><strong>Erro:</strong> {e}</p>"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
