@@ -13,7 +13,8 @@ def criar_tabela():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
-            dias_antes INTEGER NOT NULL
+            dias_antes INTEGER NOT NULL,
+            ultimo_envio DATE
         )
     ''')
     conn.commit()
@@ -60,6 +61,21 @@ def cadastrar():
         return redirect('/')
     
     return render_template('cadastrar.html')
+
+@app.route('/listar')
+def listar_licencas():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT id, nome, vencimento, dias_antes, ultimo_envio FROM licencas")
+    licencas = c.fetchall()
+    conn.close()
+
+    html = "<h2>Licenças Cadastradas</h2><ul>"
+    for lic in licencas:
+        html += f"<li>{lic}</li>"
+    html += "</ul>"
+    return html
+
 
 
 if __name__ == '__main__':
