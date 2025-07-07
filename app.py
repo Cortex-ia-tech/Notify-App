@@ -1,37 +1,36 @@
 from flask import Flask, render_template, request, redirect
-import sqlite3
+import psycopg2
+from psycopg2 import sql
 from datetime import datetime
-
 
 app = Flask(__name__)
 
+# Conexão com banco PostgreSQL (Supabase)
+conn_params = {
+    "host": "db.yqwohzkwllelxptcysmn.supabase.co",
+    "database": "postgres",
+    "user": "postgres",
+    "password": "Slmg300803$"
+}
+
 def criar_tabela():
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
 
     # Cria a tabela de licenças
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
             dias_antes INTEGER NOT NULL
         )
     ''')
 
-    # Verifica e cria a coluna 'ultimo_envio' se necessário
-    c.execute("PRAGMA table_info(licencas)")
-    colunas = [coluna[1] for coluna in c.fetchall()]
-    if 'ultimo_envio' not in colunas:
-        try:
-            c.execute("ALTER TABLE licencas ADD COLUMN ultimo_envio DATE")
-        except Exception as e:
-            print("Erro ao adicionar coluna:", e)
-
     # Cria a tabela de usuários
     c.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             senha TEXT NOT NULL
@@ -42,10 +41,9 @@ def criar_tabela():
     conn.close()
 
 
-
 @app.route('/')
 def home():
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
     c.execute('SELECT id, nome, vencimento FROM licencas')
     licencas = c.fetchall()
@@ -55,15 +53,13 @@ def home():
     a_vencer = []
     vencidas = []
 
-    for id_,nome, vencimento in licencas:
-        data_venc = datetime.strptime(vencimento, '%Y-%m-%d').date()
-        if data_venc >= hoje:
-            a_vencer.append((id_,nome, data_venc))
+    for id_, nome, vencimento in licencas:
+        if vencimento >= hoje:
+            a_vencer.append((id_, nome, vencimento))
         else:
-            vencidas.append((id_,nome, data_venc))
+            vencidas.append((id_, nome, vencimento))
 
     return render_template('home.html', a_vencer=a_vencer, vencidas=vencidas)
-
 
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
@@ -73,9 +69,9 @@ def cadastrar():
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
 
-        conn = sqlite3.connect('database.db')
+        conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
-        c.execute('INSERT INTO licencas (nome, vencimento, dias_antes) VALUES (?, ?, ?)',
+        c.execute('INSERT INTO licencas (nome, vencimento, dias_antes) VALUES (%s, %s, %s)',
                   (nome, vencimento, dias_antes))
         conn.commit()
         conn.close()
@@ -85,7 +81,6 @@ def cadastrar():
     return render_template('cadastrar.html')
 
 
-
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
     if request.method == 'POST':
@@ -93,13 +88,13 @@ def registrar():
         email = request.form['email']
         senha = request.form['senha']
 
-        conn = sqlite3.connect('database.db')
+        conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
         try:
-            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)', (nome, email, senha))
+            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s)', (nome, email, senha))
             conn.commit()
-        except sqlite3.IntegrityError:
-            conn.close()
+        except psycopg2.errors.UniqueViolation:
+            conn.rollback()
             return "Este e-mail já está cadastrado."
         conn.close()
 
@@ -110,7 +105,7 @@ def registrar():
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
-    conn = sqlite3.connect('database.db')
+    conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
 
     if request.method == 'POST':
@@ -120,15 +115,15 @@ def editar(id):
 
         c.execute('''
             UPDATE licencas
-            SET nome = ?, vencimento = ?, dias_antes = ?
-            WHERE id = ?
+            SET nome = %s, vencimento = %s, dias_antes = %s
+            WHERE id = %s
         ''', (nome, vencimento, dias_antes, id))
         conn.commit()
         conn.close()
         return redirect('/')
 
     # Se for GET, busca os dados da licença
-    c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = ?', (id,))
+    c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = %s', (id,))
     licenca = c.fetchone()
     conn.close()
 
@@ -140,6 +135,6 @@ def editar(id):
 
 criar_tabela()
 
-#if __name__ == '__main__':
-    #app.run(host='0.0.0.0', port=10000)
-
+# Descomente se quiser rodar localmente:
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0', port=10000)
