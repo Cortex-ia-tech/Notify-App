@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 
 # Configuração do horário fixo (ex: 08h00)
-HORA_ALVO = 8
+HORA_ALVO = (9, 35, 30)
 
 # Conexão com o banco PostgreSQL Supabase
 conn_params = {
@@ -24,8 +24,8 @@ destinatario = "leonardomoreira@petroserra.com"
 
 # Verifica se é exatamente o horário definido
 agora = datetime.now()
-if agora.hour != HORA_ALVO:
-    print(f"Horário atual: {agora.strftime('%H:%M')}. E-mails só são enviados às {HORA_ALVO:02d}:00.")
+if (agora.hour, agora.minute, agora.second) != HORA_ALVO:
+    print(f"Horário atual: {agora.strftime('%H:%M:%S')}. E-mails só são enviados exatamente às {HORA_ALVO[0]:02d}:{HORA_ALVO[1]:02d}:{HORA_ALVO[2]:02d}.")
     exit()
 
 # Caminho do arquivo persistente
