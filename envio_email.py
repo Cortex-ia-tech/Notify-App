@@ -24,7 +24,15 @@ with open(ARQUIVO_ENVIADOS, 'r') as f:
     codigos_enviados = set(linha.strip() for linha in f.readlines())
 
 # Conecta ao banco PostgreSQL (use sua string de conexão real aqui)
-conn = psycopg2.connect("postgresql://postgres:[Slmg300803$]@db.yqwohzkwllelxptcysmn.supabase.co:5432/postgres")
+conn_params = {
+    "host": "db.yqwohzkwllelxptcysmn.supabase.co",
+    "database": "postgres",
+    "user": "postgres",
+    "password": "Slmg300803$",
+    "sslmode": "require"
+}
+
+conn = psycopg2.connect(**conn_params)
 c = conn.cursor()
 c.execute('SELECT id, nome, vencimento, dias_antes FROM licencas')
 licencas = c.fetchall()

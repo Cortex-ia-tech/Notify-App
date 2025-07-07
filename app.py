@@ -10,7 +10,8 @@ conn_params = {
     "host": "db.yqwohzkwllelxptcysmn.supabase.co",
     "database": "postgres",
     "user": "postgres",
-    "password": "Slmg300803$"
+    "password": "Slmg300803$",
+    "sslmode": "require"  # ATIVA CONEXÃO SEGURA
 }
 
 def criar_tabela():
