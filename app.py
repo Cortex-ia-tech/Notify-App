@@ -7,11 +7,12 @@ app = Flask(__name__)
 
 # Conexão com banco PostgreSQL (Supabase)
 conn_params = {
-    "host": "db.yqwohzkwllelxptcysmn.supabase.co",
-    "database": "postgres",
-    "user": "postgres",
+    "host": "aws-0-sa-east-1.pooler.supabase.com",
+    "port": 6543,
+    "dbname": "postgres",
+    "user": "postgres.yqwohzkwllelxptcysmn",
     "password": "Slmg300803$",
-    "sslmode": "require"  # ATIVA CONEXÃO SEGURA
+    "sslmode": "require"
 }
 
 def criar_tabela():

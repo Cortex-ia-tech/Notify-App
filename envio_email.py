@@ -24,10 +24,13 @@ with open(ARQUIVO_ENVIADOS, 'r') as f:
     codigos_enviados = set(linha.strip() for linha in f.readlines())
 
 # Conecta ao banco PostgreSQL (use sua string de conexão real aqui)
+import psycopg2
+
 conn_params = {
-    "host": "db.yqwohzkwllelxptcysmn.supabase.co",
-    "database": "postgres",
-    "user": "postgres",
+    "host": "aws-0-sa-east-1.pooler.supabase.com",
+    "port": 6543,
+    "dbname": "postgres",
+    "user": "postgres.yqwohzkwllelxptcysmn",
     "password": "Slmg300803$",
     "sslmode": "require"
 }
