@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 
 # Configuração do horário fixo (ex: 08h00)
-HORA_ALVO = (12, 58)
+HORA_ALVO = (13, 58)
 
 # Conexão com o banco PostgreSQL Supabase
 conn_params = {
