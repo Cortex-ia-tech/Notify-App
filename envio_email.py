@@ -15,8 +15,8 @@ conn_params = {
     "host": "aws-0-sa-east-1.pooler.supabase.com",
     "port": 6543,
     "dbname": "postgres",
-    "user": "postgres",
-    "password": "PdSE1xyxPqTT5fYO"
+    "user": "postgres.yqwohzkwllelxptcysmn",
+    "password": "2GJJMcsVVP1BPKKK"
 }
 
 # Caminho do arquivo persistente
