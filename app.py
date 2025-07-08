@@ -2,8 +2,15 @@ from flask import Flask, render_template, request, redirect
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 
 app = Flask(__name__)
+
+app.secret_key = 'segredo-super-seguro'
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
 
 # Conexão com banco PostgreSQL (Supabase)
 conn_params = {
@@ -44,6 +51,7 @@ def criar_tabela():
 
 
 @app.route('/')
+@login_required
 def home():
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
@@ -105,6 +113,30 @@ def registrar():
     return render_template('registrar.html')
 
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['senha']
+
+        conn = psycopg2.connect(**conn_params)
+        c = conn.cursor()
+        c.execute('SELECT id, nome, email, senha FROM usuarios WHERE email = %s', (email,))
+        user = c.fetchone()
+        conn.close()
+
+        if user and user[3] == senha:
+            login_user(User(*user))
+            return redirect('/')
+        else:
+            return "Login inválido."
+
+    return render_template('login.html')
+
+
+
+
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
     conn = psycopg2.connect(**conn_params)
@@ -136,6 +168,25 @@ def editar(id):
 
 
 criar_tabela()
+
+class User(UserMixin):
+    def __init__(self, id_, nome, email, senha):
+        self.id = id_
+        self.nome = nome
+        self.email = email
+        self.senha = senha
+
+@login_manager.user_loader
+def load_user(user_id):
+    conn = psycopg2.connect(**conn_params)
+    c = conn.cursor()
+    c.execute('SELECT id, nome, email, senha FROM usuarios WHERE id = %s', (int(user_id),))
+    user = c.fetchone()
+    conn.close()
+    if user:
+        return User(*user)
+    return None
+
 
 # Descomente se quiser rodar localmente:
 # if __name__ == '__main__':
