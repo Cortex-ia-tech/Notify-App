@@ -9,18 +9,14 @@
     <h1>Cadastrar Nova Licença</h1>
 
     <form method="POST" action="/cadastrar">
-        <label>Nome da licença:</label><br>
-        <input type="text" name="nome" required><br><br>
+        <label for="nome_licenca">Nome da licença:</label><br>
+        <input type="text" id="nome_licenca" name="nome" required><br><br>
 
-        <label>Data de vencimento:</label><br>
-        <input type="date" name="vencimento" required><br><br>
+        <label for="data_vencimento">Data de vencimento:</label><br>
+        <input type="date" id="data_vencimento" name="vencimento" required><br><br>
 
-        <label>Alerta com antecedência:</label><br>
-        <select name="dias_antes">
-            <option value="30">30 dias</option>
-            <option value="45">45 dias</option>
-            <option value="60">60 dias</option>
-        </select><br><br>
+        <label for="dias_antes">Alerta com antecedência (dias):</label><br>
+        <input type="number" id="dias_antes" name="dias_antes" min="1" placeholder="Ex: 30" required><br><br>
 
         <button type="submit">Salvar</button>
     </form>
