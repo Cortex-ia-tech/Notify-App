@@ -63,15 +63,12 @@ for id_, nome, vencimento, dias_antes in licencas:
         corpo = f"""
 Olá,
 
-Esta é uma notificação automática do sistema SkyNotify.
-
 A licença "{nome}" está próxima do vencimento (vence em {data_venc.strftime('%d/%m/%Y')}). 
-Você optou por receber lembretes a partir de {dias_antes} dias antes.
 
-Acesse o SkyNotify para atualizar essa licença.
+Se precisar, acesse o SkyNotify para atualizar essa licença.
 
 Att,  
-SkyNotify | SkyNet Business Automation
+SkyNotify | Uma criação SkyNet Business Inteligence®
 """
         mensagem.attach(MIMEText(corpo, "plain"))
 
