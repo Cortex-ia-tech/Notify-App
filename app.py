@@ -12,7 +12,7 @@ conn_params = {
     "dbname": "postgres",
     "user": "postgres.yqwohzkwllelxptcysmn",
     "password": "2GJJMcsVVP1BPKKK",
-    "sslmode": "require"
+    
 }
 
 def criar_tabela():
