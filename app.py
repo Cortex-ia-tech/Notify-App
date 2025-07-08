@@ -11,7 +11,7 @@ conn_params = {
     "port": 6543,
     "dbname": "postgres",
     "user": "postgres.yqwohzkwllelxptcysmn",
-    "password": "Slmg300803$",
+    "password": "PdSE1xyxPqTT5fYO",
     "sslmode": "require"
 }
 

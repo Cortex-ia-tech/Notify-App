@@ -13,10 +13,10 @@ destinatario = "leonardomoreira@petroserra.com"
 # Configurações do banco PostgreSQL (Supabase)
 conn_params = {
     "host": "aws-0-sa-east-1.pooler.supabase.com",
-    "database": "postgres",
+    "port": 6543,
+    "dbname": "postgres",
     "user": "postgres",
-    "password": "Slmg300803$",
-    "port": 6543
+    "password": "PdSE1xyxPqTT5fYO"
 }
 
 # Caminho do arquivo persistente
