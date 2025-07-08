@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin, logout_user
 
 app = Flask(__name__)
 
@@ -10,6 +10,7 @@ app.secret_key = 'segredo-super-seguro'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+app.secret_key = 'alguma_chave_secreta_segura'
 
 
 # Conexão com banco PostgreSQL (Supabase)
@@ -73,6 +74,7 @@ def home():
 
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
+@login_required
 def cadastrar():
     if request.method == 'POST':
         nome = request.form['nome']
@@ -138,6 +140,7 @@ def login():
 
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar(id):
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
@@ -186,6 +189,13 @@ def load_user(user_id):
     if user:
         return User(*user)
     return None
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/login')
+
 
 
 # Descomente se quiser rodar localmente:
