@@ -144,8 +144,8 @@ def login():
         conn.close()
 
         if usuario:
-            session['usuario_id'] = usuario[0]
-            session['nome_usuario'] = usuario[1]
+            user_obj = User(id_=usuario[0], nome=usuario[1], email=email, senha=senha)
+            login_user(user_obj)  # <- login "oficial" do flask_login
             return redirect('/')
         else:
             erro = "Usuário ou senha inválidos."
@@ -216,7 +216,8 @@ def load_user(user_id):
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()
+    logout_user()  # limpa o flask_login
+    session.clear()  # limpa toda a session do Flask
     return redirect('/login')
 
 
