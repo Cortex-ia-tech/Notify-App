@@ -47,16 +47,26 @@ def criar_tabela():
         )
     ''')
 
+    # Adiciona a coluna usuario_id se ainda não existir
+    c.execute("SELECT column_name FROM information_schema.columns WHERE table_name='licencas'")
+    colunas = [coluna[0] for coluna in c.fetchall()]
+    if 'usuario_id' not in colunas:
+        c.execute("ALTER TABLE licencas ADD COLUMN usuario_id INTEGER REFERENCES usuarios(id)")
+
     conn.commit()
     conn.close()
 
 
 @app.route('/')
-@login_required
 def home():
+    if 'usuario_id' not in session:
+        return redirect('/login')
+
+    usuario_id = session['usuario_id']
+
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
-    c.execute('SELECT id, nome, vencimento FROM licencas')
+    c.execute('SELECT id, nome, vencimento FROM licencas WHERE usuario_id = %s', (usuario_id,))
     licencas = c.fetchall()
     conn.close()
 
@@ -65,32 +75,38 @@ def home():
     vencidas = []
 
     for id_, nome, vencimento in licencas:
-        if vencimento >= hoje:
-            a_vencer.append((id_, nome, vencimento))
+        data_venc = vencimento  # já vem como date do PostgreSQL
+        if data_venc >= hoje:
+            a_vencer.append((id_, nome, data_venc))
         else:
-            vencidas.append((id_, nome, vencimento))
+            vencidas.append((id_, nome, data_venc))
 
     return render_template('home.html', a_vencer=a_vencer, vencidas=vencidas)
 
 
+
 @app.route('/cadastrar', methods=['GET', 'POST'])
-@login_required
 def cadastrar():
+    if 'usuario_id' not in session:
+        return redirect('/login')
+
     if request.method == 'POST':
         nome = request.form['nome']
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
+        usuario_id = session['usuario_id']
 
         conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
-        c.execute('INSERT INTO licencas (nome, vencimento, dias_antes) VALUES (%s, %s, %s)',
-                  (nome, vencimento, dias_antes))
+        c.execute('INSERT INTO licencas (nome, vencimento, dias_antes, usuario_id) VALUES (%s, %s, %s, %s)',
+                  (nome, vencimento, dias_antes, usuario_id))
         conn.commit()
         conn.close()
 
         return redirect('/')
-    
+
     return render_template('cadastrar.html')
+
 
 
 @app.route('/registrar', methods=['GET', 'POST'])
@@ -141,10 +157,21 @@ def login():
 
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
-@login_required
 def editar(id):
+    if 'usuario_id' not in session:
+        return redirect('/login')
+
+    usuario_id = session['usuario_id']
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
+
+    # Verifica se a licença pertence ao usuário
+    c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = %s AND usuario_id = %s', (id, usuario_id))
+    licenca = c.fetchone()
+
+    if not licenca:
+        conn.close()
+        return "Licença não encontrada ou acesso negado"
 
     if request.method == 'POST':
         nome = request.form['nome']
@@ -154,21 +181,15 @@ def editar(id):
         c.execute('''
             UPDATE licencas
             SET nome = %s, vencimento = %s, dias_antes = %s
-            WHERE id = %s
-        ''', (nome, vencimento, dias_antes, id))
+            WHERE id = %s AND usuario_id = %s
+        ''', (nome, vencimento, dias_antes, id, usuario_id))
         conn.commit()
         conn.close()
         return redirect('/')
 
-    # Se for GET, busca os dados da licença
-    c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = %s', (id,))
-    licenca = c.fetchone()
     conn.close()
+    return render_template('editar.html', id=id, nome=licenca[0], vencimento=licenca[1], dias_antes=licenca[2])
 
-    if licenca:
-        return render_template('editar.html', id=id, nome=licenca[0], vencimento=licenca[1], dias_antes=licenca[2])
-    else:
-        return "Licença não encontrada"
 
 
 criar_tabela()
