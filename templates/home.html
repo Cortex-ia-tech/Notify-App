@@ -19,6 +19,9 @@
     <div class="usuario-logado">
         Olá {{ session.nome_usuario }}, se precisar de ajuda, não hesite em
         <a href="/suporte">clicar aqui</a>
+        <p style="font-size: 13px; text-align: right; margin-right: 20px;">
+        <a href="/logout" style="color: red;">Sair da conta</a>
+        </p>
     </div>
     {% endif %}
 
