@@ -1,82 +1,28 @@
-<!-- <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>CodNotify - Home</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <h1>Bem-vindo ao CodNotify</h1>
-        <p style="margin-top: 10px;">
-            <a href="/cadastrar">
-                <button style="padding: 10px 20px; font-size: 14px;">+ Cadastrar nova licença</button>
-            </a>
-        </p>
-
-        <p>Este será seu painel de controle para gerenciar as licenças.</p>
-
-        <div class="quadro">
-    <h2>Licenças a vencer</h2>
-        {% if a_vencer %}
-            <ul>
-            {% for id_, nome, data in a_vencer %}
-                <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }} 
-                    - <a href="/editar/{{ id_ }}">Editar</a>
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>Nenhuma licença a vencer.</p>
-        {% endif %}
-        </div>
-
-        <div class="quadro">
-    <h2>Licenças vencidas</h2>
-        {% if vencidas %}
-            <ul>
-            {% for id_, nome, data in vencidas %}
-                <li>{{ nome }} - venceu em {{ data.strftime('%d/%m/%Y') }}
-                    - <a href="/editar/{{ id_ }}">Editar</a>
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>Nenhuma licença vencida.</p>
-        {% endif %}
-        </div>
-
-
-        <footer style="text-align: center; margin-top: 50px;">
-        <p style="font-size: 15px; color: #686868;">
-            SkyNotify 2025 – Desenvolvido por SkyNet Business Intelligence ® <br> Todos os direitos reservados.
-        </p>
-        </footer>
-
-
-
-</body>
-</html>  -->
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>CodNotify - Home</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .usuario-logado {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: #444;
+        }
+    </style>
 </head>
 <body>
-    <header class="main-header">
-        <h1>Bem-vindo ao CodNotify</h1>
-        {% if session.get('nome_usuario') %}
-            <div class="user-greeting">
-                <p>Olá {{ session['nome_usuario'] }}, se precisar de ajuda, não hesite em
-                    <a href="/suporte">clicar aqui</a> 👈
-                </p>
-            </div>
-        {% endif %}
-    </header>
+    {% if session.nome_usuario %}
+    <div class="usuario-logado">
+        Olá {{ session.nome_usuario }}, se precisar de ajuda, não hesite em
+        <a href="/suporte">clicar aqui</a> 👉
+    </div>
+    {% endif %}
 
+    <h1>Bem-vindo ao CodNotify</h1>
     <p style="margin-top: 10px;">
         <a href="/cadastrar">
             <button style="padding: 10px 20px; font-size: 14px;">+ Cadastrar nova licença</button>
@@ -90,7 +36,7 @@
         {% if a_vencer %}
             <ul>
             {% for id_, nome, data in a_vencer %}
-                <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }}
+                <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }} 
                     - <a href="/editar/{{ id_ }}">Editar</a>
                 </li>
             {% endfor %}
@@ -120,6 +66,5 @@
             SkyNotify 2025 – Desenvolvido por SkyNet Business Intelligence ® <br> Todos os direitos reservados.
         </p>
     </footer>
-
 </body>
 </html>
