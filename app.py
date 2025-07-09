@@ -148,7 +148,8 @@ def login():
             session['nome_usuario'] = usuario[1]
             return redirect('/')
         else:
-            return "Usuário ou senha inválidos. <a href='/login'>Tente novamente</a>"
+            erro = "Usuário ou senha inválidos."
+            return render_template('login.html', erro=erro)
 
     return render_template('login.html')
 
