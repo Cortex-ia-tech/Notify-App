@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
@@ -115,7 +115,6 @@ def registrar():
     return render_template('registrar.html')
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -124,17 +123,19 @@ def login():
 
         conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
-        c.execute('SELECT id, nome, email, senha FROM usuarios WHERE email = %s', (email,))
-        user = c.fetchone()
+        c.execute('SELECT id, nome FROM usuarios WHERE email = %s AND senha = %s', (email, senha))
+        usuario = c.fetchone()
         conn.close()
 
-        if user and user[3] == senha:
-            login_user(User(*user))
+        if usuario:
+            session['usuario_id'] = usuario[0]
+            session['nome_usuario'] = usuario[1]
             return redirect('/')
         else:
-            return "Login inválido."
+            return "Usuário ou senha inválidos. <a href='/login'>Tente novamente</a>"
 
     return render_template('login.html')
+
 
 
 
