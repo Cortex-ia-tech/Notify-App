@@ -1,19 +1,16 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash # Importa url_for e flash
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 import psycopg2
 from psycopg2 import sql
-from datetime import datetime
+from datetime import datetime # Certifique-se de que datetime esteja importado
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 
 app = Flask(__name__)
 
-# Mantenha apenas uma definição para app.secret_key
-app.secret_key = 'segredo-super-seguro'
+app.secret_key = 'segredo-super-seguro' # Mantenha sua chave secreta aqui!
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-# Define para onde o Flask-Login deve redirecionar usuários não autenticados
 login_manager.login_view = 'login'
-
 
 # Conexão com banco PostgreSQL (Supabase)
 conn_params = {
@@ -28,6 +25,16 @@ def criar_tabela():
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
 
+    # Cria a tabela de usuários ANTES da tabela de licenças para a FK
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            nome TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            senha TEXT NOT NULL
+        )
+    ''')
+
     # Cria a tabela de licenças (garantindo que usuario_id esteja presente)
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
@@ -36,16 +43,6 @@ def criar_tabela():
             vencimento DATE NOT NULL,
             dias_antes INTEGER NOT NULL,
             usuario_id INTEGER REFERENCES usuarios(id)
-        )
-    ''')
-
-    # Cria a tabela de usuários
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id SERIAL PRIMARY KEY,
-            nome TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            senha TEXT NOT NULL
         )
     ''')
     conn.commit()
@@ -60,7 +57,6 @@ class User(UserMixin):
         self.email = email
         self.senha = senha
 
-    # Método obrigatório para o Flask-Login
     def get_id(self):
         return str(self.id)
 
@@ -69,6 +65,7 @@ class User(UserMixin):
 def load_user(user_id):
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
+    # Certifique-se de que a ordem das colunas aqui corresponde à ordem do construtor User
     c.execute('SELECT id, nome, email, senha FROM usuarios WHERE id = %s', (int(user_id),))
     user_data = c.fetchone()
     conn.close()
@@ -81,7 +78,6 @@ def load_user(user_id):
 @app.route('/')
 @login_required # Protege a rota: exige login para acessar
 def home():
-    # current_user.id é o ID do usuário logado, gerido pelo Flask-Login
     usuario_id = current_user.id
 
     conn = psycopg2.connect(**conn_params)
@@ -105,13 +101,13 @@ def home():
 
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
-@login_required # Protege a rota: exige login para acessar
+@login_required
 def cadastrar():
     if request.method == 'POST':
         nome = request.form['nome']
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
-        usuario_id = current_user.id # Pega o ID do usuário logado
+        usuario_id = current_user.id
 
         conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
@@ -120,19 +116,21 @@ def cadastrar():
         conn.commit()
         conn.close()
 
-        flash('Licença cadastrada com sucesso!', 'success') # Adiciona uma mensagem flash
-        return redirect(url_for('home')) # Usa url_for para redirecionar
+        flash('Licença cadastrada com sucesso!', 'success')
+        return redirect(url_for('home'))
 
+    # Certifique-se de que você tem um template 'cadastrar.html'
     return render_template('cadastrar.html')
 
 
 @app.route('/registrar', methods=['GET', 'POST'])
-@login_required # Rota protegida: exige login
+# @login_required # Removi login_required. Geralmente, registrar não exige login prévio.
 def registrar():
-    # Somente o usuário autorizado pode acessar esta rota
-    if current_user.email != 'leonardomoreira@petroserra.com':
-        flash('Você não tem permissão para registrar novos usuários.', 'danger') # Mensagem de erro
-        return redirect(url_for('home'))
+    # Se você quiser que APENAS um ADMIN (já logado) possa registrar, mantenha o @login_required acima
+    # E mantenha esta verificação de email. Caso contrário, remova.
+    # if current_user.is_authenticated and current_user.email != 'leonardomoreira@petroserra.com':
+    #     flash('Você não tem permissão para registrar novos usuários.', 'danger')
+    #     return redirect(url_for('home'))
 
     if request.method == 'POST':
         nome = request.form['nome']
@@ -142,22 +140,24 @@ def registrar():
         conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
         try:
-            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s)', (nome, email, senha))
+            c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s) RETURNING id', (nome, email, senha))
+            new_user_id = c.fetchone()[0] # Pega o ID do novo usuário
             conn.commit()
-            flash('Usuário registrado com sucesso!', 'success')
-            return redirect(url_for('home'))
+            flash('Usuário registrado com sucesso! Faça login para continuar.', 'success')
+            # Após registrar, você pode redirecionar para a página de login
+            return redirect(url_for('login'))
         except psycopg2.errors.UniqueViolation:
             conn.rollback()
             flash('Este e-mail já está cadastrado.', 'danger')
         finally:
             conn.close()
 
+    # Certifique-se de que você tem um template 'registrar.html'
     return render_template('registrar.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Se o usuário já estiver logado, redireciona para a home
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
@@ -174,24 +174,22 @@ def login():
         if user_data:
             user_obj = User(id_=user_data[0], nome=user_data[1], email=user_data[2], senha=user_data[3])
             login_user(user_obj)
-            # Redireciona para a página que o usuário tentou acessar antes de ser redirecionado para o login
             next_page = request.args.get('next')
+            flash(f'Olá, {user_obj.nome}! Bem-vindo(a) de volta.', 'success') # Mensagem de boas-vindas
             return redirect(next_page or url_for('home'))
         else:
-            flash('Usuário ou senha inválidos.', 'danger') # Mensagem de erro
-            return render_template('login.html') # Renderiza o template de login novamente
-
+            flash('Usuário ou senha inválidos.', 'danger')
+            # Permite renderizar o template de login novamente com a mensagem de erro
     return render_template('login.html')
 
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
-@login_required # Protege a rota: exige login
+@login_required
 def editar(id):
-    usuario_id = current_user.id # Pega o ID do usuário logado
+    usuario_id = current_user.id
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
 
-    # Verifica se a licença pertence ao usuário logado
     c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = %s AND usuario_id = %s', (id, usuario_id))
     licenca = c.fetchone()
 
@@ -216,20 +214,28 @@ def editar(id):
         return redirect(url_for('home'))
 
     conn.close()
+    # Certifique-se de que você tem um template 'editar.html'
     return render_template('editar.html', id=id, nome=licenca[0], vencimento=licenca[1], dias_antes=licenca[2])
 
 
 @app.route('/logout')
-@login_required # Exige login para fazer logout
+@login_required
 def logout():
-    logout_user()  # Limpa o usuário da sessão do Flask-Login
-    session.clear()  # Limpa toda a sessão do Flask
-    flash('Você foi desconectado com sucesso.', 'info') # Mensagem de logout
-    return redirect(url_for('login'))
+    logout_user()
+    session.clear()
+    flash('Você foi desconectado com sucesso.', 'info')
+    return redirect(url_for('login')) # Redireciona para a página de login após o logout
+
+@app.route('/suporte')
+@login_required # Geralmente, a página de suporte pode não exigir login, mas como está no dropdown de logado, podemos manter.
+def suporte():
+    # Certifique-se de que você tem um template 'suporte.html' ou retorne uma mensagem simples
+    return render_template('suporte.html')
+    # Ou simplesmente: return "<h1>Página de Suporte</h1><p>Entre em contato conosco!</p>"
 
 
 # Chama criar_tabela apenas uma vez, na inicialização do app
 criar_tabela()
 
 if __name__ == '__main__':
-    app.run(debug=True) # Em produção, mude debug para False
+    app.run(debug=True)
