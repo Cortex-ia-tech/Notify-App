@@ -2,22 +2,25 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>CodNotify - Home</title>
+    <title>Notify - Home</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Estilos Globais e Reset */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte moderna e limpa */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding-top: 70px; /* Espaço para o cabeçalho fixo */
-            background-color: #f8f9fa; /* Fundo suave */
-            color: #343a40; /* Cor de texto principal */
+            padding-top: 70px;
+            background-color: #f8f9fa;
+            color: #343a40;
             line-height: 1.6;
+            /* Novas adições para remover barras de rolagem desnecessárias */
+            overflow-x: hidden; /* Garante que não haverá barra de rolagem horizontal */
+            overflow-y: hidden; /* Garante que não haverá barra de rolagem vertical */
         }
 
         a {
             text-decoration: none;
-            color: inherit; /* Links herdam a cor do texto pai por padrão */
+            color: inherit;
         }
 
         /* --- Barra de Navegação Fixa (Header) --- */
@@ -26,79 +29,79 @@
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #ffffff; /* Fundo branco para a barra */
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave para elevação */
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             padding: 10px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000; /* Garante que fique acima de outros elementos */
+            z-index: 1000;
         }
 
         .header-left .logo {
-            font-size: 28px; /* Tamanho maior para o logo */
-            font-weight: 700; /* Mais encorpado */
-            color: #28a745; /* Verde vibrante para a marca */
+            font-size: 28px;
+            font-weight: 700;
+            color: #28a745;
             transition: color 0.3s ease;
         }
 
         .header-left .logo:hover {
-            color: #218838; /* Escurece um pouco ao passar o mouse */
+            color: #218838;
         }
 
         .header-right {
-            position: relative; /* Para o posicionamento do dropdown */
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 15px; /* Espaçamento entre o nome e o ícone */
+            margin-right: 10px; /* Ajuste para mover o grupo de login/usuário um pouco para a esquerda */
+            gap: 15px;
         }
 
         /* Novo estilo para a área clicável do usuário */
         .header-right .username-wrapper {
             display: flex;
             align-items: center;
-            cursor: pointer; /* Indica que é clicável */
-            padding: 5px 10px; /* Adiciona um padding para a área clicável */
-            border-radius: 20px; /* Arredonda as bordas */
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 20px;
             transition: background-color 0.3s;
         }
 
         .header-right .username-wrapper:hover {
-            background-color: #f0f2f5; /* Fundo suave ao passar o mouse */
+            background-color: #f0f2f5;
         }
 
         .header-right .username {
             font-size: 15px;
             color: #555;
-            white-space: nowrap; /* Impede que o nome quebre a linha */
-            margin-right: 8px; /* Espaço entre o nome e o ícone */
+            white-space: nowrap;
+            margin-right: 8px;
         }
 
         .header-right .icon-button {
             background: none;
             border: none;
-            font-size: 22px; /* Tamanho do ícone */
-            color: #6c757d; /* Cor cinza sutil para o ícone */
-            /* Removido padding e border-radius daqui, movido para username-wrapper */
+            font-size: 22px;
+            color: #6c757d;
             transition: color 0.3s;
         }
 
         .header-right .icon-button:hover {
-            color: #343a40; /* Escurece o ícone ao passar o mouse */
+            color: #343a40;
         }
 
         /* Dropdown Menu */
         .dropdown-menu {
             position: absolute;
-            top: calc(100% + 10px); /* Posiciona ligeiramente abaixo do botão */
+            top: calc(100% + 10px);
             right: 0;
             background-color: #ffffff;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra mais pronunciada */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             border-radius: 8px;
-            overflow: hidden; /* Garante que os cantos arredondados funcionem */
-            opacity: 0; /* Começa invisível */
-            visibility: hidden; /* Oculta para acessibilidade */
-            transform: translateY(15px); /* Efeito de deslize para baixo */
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
             transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
             min-width: 180px;
             z-index: 1001;
@@ -120,16 +123,16 @@
         }
 
         .dropdown-menu a:hover {
-            background-color: #e9ecef; /* Fundo suave ao passar o mouse */
-            color: #007bff; /* Azul para links em destaque */
+            background-color: #e9ecef;
+            color: #007bff;
         }
 
         .dropdown-menu a.logout {
-            color: #dc3545; /* Vermelho para a opção de logout */
+            color: #dc3545;
         }
 
         .dropdown-menu a.logout:hover {
-            background-color: #ffebe9; /* Fundo vermelho suave para logout */
+            background-color: #ffebe9;
             color: #c82333;
         }
 
@@ -170,17 +173,18 @@
 
         /* --- Conteúdo Principal --- */
         .container {
-            max-width: 960px; /* Largura máxima do conteúdo */
-            margin: 20px auto; /* Centraliza na página */
-            padding: 0 20px; /* Padding interno para as bordas */
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
 
         h1 {
-            color: #2c3e50; /* Título principal */
+            color: #2c3e50;
             text-align: center;
-            margin-top: 40px; /* Espaçamento após o header */
+            margin-top: 40px;
             margin-bottom: 20px;
-            font-size: 2.5em; /* Tamanho maior para o H1 */
+            font-size: 2.5em;
             font-weight: 600;
         }
 
@@ -193,32 +197,32 @@
 
         .button-section {
             text-align: center;
-            margin-bottom: 50px; /* Mais espaço antes dos quadros */
+            margin-bottom: 50px;
         }
 
         .button-section button {
-            padding: 14px 30px; /* Botão maior e mais clicável */
+            padding: 14px 30px;
             font-size: 17px;
-            background-color: #28a745; /* Mesma cor verde do logo */
+            background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 8px; /* Bordas mais arredondadas */
+            border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2); /* Sombra para o botão */
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
         }
 
         .button-section button:hover {
             background-color: #218838;
-            transform: translateY(-2px); /* Pequeno efeito de elevação */
+            transform: translateY(-2px);
         }
 
         /* --- Quadros de Licenças --- */
         .quadro {
             background-color: #ffffff;
-            border-radius: 10px; /* Cantos arredondados */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* Sombra mais definida */
-            padding: 30px; /* Mais padding interno */
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            padding: 30px;
             margin-bottom: 30px;
         }
 
@@ -226,7 +230,7 @@
             color: #34495e;
             margin-top: 0;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e9ecef; /* Linha divisória suave */
+            border-bottom: 2px solid #e9ecef;
             padding-bottom: 15px;
             font-size: 1.6em;
             font-weight: 500;
@@ -239,7 +243,7 @@
 
         .quadro li {
             padding: 12px 0;
-            border-bottom: 1px dashed #e0e0e0; /* Linha tracejada suave */
+            border-bottom: 1px dashed #e0e0e0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -247,7 +251,7 @@
         }
 
         .quadro li:last-child {
-            border-bottom: none; /* Remove a borda do último item */
+            border-bottom: none;
         }
 
         .quadro li a {
@@ -270,22 +274,22 @@
 
         /* --- Rodapé --- */
         footer {
-            background-color: #e9ecef; /* Fundo suave para o rodapé */
+            background-color: #e9ecef;
             padding: 25px;
-            margin-top: 60px; /* Mais espaço acima do rodapé */
+            margin-top: 60px;
             color: #6c757d;
             font-size: 13px;
             text-align: center;
-            border-top: 1px solid #dee2e6; /* Borda superior */
+            border-top: 1px solid #dee2e6;
         }
     </style>
 </head>
 <body>
     <header class="fixed-header">
         <div class="header-left">
-            <a href="{{ url_for('home') }}" class="logo">CodNotify</a> </div>
+            <a href="{{ url_for('home') }}" class="logo">Notify</a>
+        </div>
         <div class="header-right">
-            {# Verifica se o usuário está autenticado usando current_user.is_authenticated #}
             {% if current_user.is_authenticated %}
             <div class="username-wrapper" onclick="toggleDropdown()">
                 <span class="username">Olá {{ current_user.nome }}</span>
@@ -303,7 +307,7 @@
     </header>
 
     <div class="container">
-        <h1>Bem-vindo ao Notify</h1>
+        <h1>Notify</h1>
         <p class="description-text">Este é o seu painel de controle para gerenciar suas licenças e lembretes de forma eficiente.</p>
 
         <div class="button-section">
@@ -347,7 +351,7 @@
 
     <footer>
         <p>
-            SkyNotify 2025 – Desenvolvido por SkyNet Business Intelligence ® <br> Todos os direitos reservados.
+            Notify 2025 – Desenvolvido por SkyNet Business Intelligence ® <br> Todos os direitos reservados.
         </p>
     </footer>
 
@@ -356,9 +360,7 @@
             document.getElementById("userDropdown").classList.toggle("show");
         }
 
-        // Fecha o dropdown se o usuário clicar fora dele
         window.onclick = function(event) {
-            // Verifica se o clique não foi dentro do .username-wrapper (que agora contém o nome e o ícone) E não foi dentro do .dropdown-menu
             if (!event.target.closest('.username-wrapper') && !event.target.closest('.dropdown-menu')) {
                 var dropdowns = document.getElementsByClassName("dropdown-menu");
                 for (var i = 0; i < dropdowns.length; i++) {
