@@ -1,16 +1,18 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for, flash # Importa url_for e flash
 import psycopg2
 from psycopg2 import sql
 from datetime import datetime
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 
 app = Flask(__name__)
 
+# Mantenha apenas uma definição para app.secret_key
 app.secret_key = 'segredo-super-seguro'
+
 login_manager = LoginManager()
 login_manager.init_app(app)
+# Define para onde o Flask-Login deve redirecionar usuários não autenticados
 login_manager.login_view = 'login'
-app.secret_key = 'alguma_chave_secreta_segura'
 
 
 # Conexão com banco PostgreSQL (Supabase)
@@ -20,20 +22,20 @@ conn_params = {
     "dbname": "postgres",
     "user": "postgres.yqwohzkwllelxptcysmn",
     "password": "2GJJMcsVVP1BPKKK",
-    
 }
 
 def criar_tabela():
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
 
-    # Cria a tabela de licenças
+    # Cria a tabela de licenças (garantindo que usuario_id esteja presente)
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
             id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
-            dias_antes INTEGER NOT NULL
+            dias_antes INTEGER NOT NULL,
+            usuario_id INTEGER REFERENCES usuarios(id)
         )
     ''')
 
@@ -46,23 +48,41 @@ def criar_tabela():
             senha TEXT NOT NULL
         )
     ''')
-
-    # Adiciona a coluna usuario_id se ainda não existir
-    c.execute("SELECT column_name FROM information_schema.columns WHERE table_name='licencas'")
-    colunas = [coluna[0] for coluna in c.fetchall()]
-    if 'usuario_id' not in colunas:
-        c.execute("ALTER TABLE licencas ADD COLUMN usuario_id INTEGER REFERENCES usuarios(id)")
-
     conn.commit()
     conn.close()
 
 
-@app.route('/')
-def home():
-    if 'usuario_id' not in session:
-        return redirect('/login')
+# Classe User para Flask-Login
+class User(UserMixin):
+    def __init__(self, id_, nome, email, senha):
+        self.id = id_
+        self.nome = nome
+        self.email = email
+        self.senha = senha
 
-    usuario_id = session['usuario_id']
+    # Método obrigatório para o Flask-Login
+    def get_id(self):
+        return str(self.id)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    conn = psycopg2.connect(**conn_params)
+    c = conn.cursor()
+    c.execute('SELECT id, nome, email, senha FROM usuarios WHERE id = %s', (int(user_id),))
+    user_data = c.fetchone()
+    conn.close()
+    if user_data:
+        return User(*user_data)
+    return None
+
+# --- Rotas ---
+
+@app.route('/')
+@login_required # Protege a rota: exige login para acessar
+def home():
+    # current_user.id é o ID do usuário logado, gerido pelo Flask-Login
+    usuario_id = current_user.id
 
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
@@ -75,7 +95,7 @@ def home():
     vencidas = []
 
     for id_, nome, vencimento in licencas:
-        data_venc = vencimento  # já vem como date do PostgreSQL
+        data_venc = vencimento
         if data_venc >= hoje:
             a_vencer.append((id_, nome, data_venc))
         else:
@@ -84,17 +104,14 @@ def home():
     return render_template('home.html', a_vencer=a_vencer, vencidas=vencidas)
 
 
-
 @app.route('/cadastrar', methods=['GET', 'POST'])
+@login_required # Protege a rota: exige login para acessar
 def cadastrar():
-    if 'usuario_id' not in session:
-        return redirect('/login')
-
     if request.method == 'POST':
         nome = request.form['nome']
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
-        usuario_id = session['usuario_id']
+        usuario_id = current_user.id # Pega o ID do usuário logado
 
         conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
@@ -103,20 +120,19 @@ def cadastrar():
         conn.commit()
         conn.close()
 
-        return redirect('/')
+        flash('Licença cadastrada com sucesso!', 'success') # Adiciona uma mensagem flash
+        return redirect(url_for('home')) # Usa url_for para redirecionar
 
     return render_template('cadastrar.html')
 
 
-
-from flask_login import current_user
-
 @app.route('/registrar', methods=['GET', 'POST'])
-@login_required
+@login_required # Rota protegida: exige login
 def registrar():
-    # Somente o usuário autorizado pode acessar
+    # Somente o usuário autorizado pode acessar esta rota
     if current_user.email != 'leonardomoreira@petroserra.com':
-        return redirect('/')
+        flash('Você não tem permissão para registrar novos usuários.', 'danger') # Mensagem de erro
+        return redirect(url_for('home'))
 
     if request.method == 'POST':
         nome = request.form['nome']
@@ -128,59 +144,61 @@ def registrar():
         try:
             c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s)', (nome, email, senha))
             conn.commit()
+            flash('Usuário registrado com sucesso!', 'success')
+            return redirect(url_for('home'))
         except psycopg2.errors.UniqueViolation:
             conn.rollback()
-            return "Este e-mail já está cadastrado."
-        conn.close()
-
-        return redirect('/')
+            flash('Este e-mail já está cadastrado.', 'danger')
+        finally:
+            conn.close()
 
     return render_template('registrar.html')
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Se o usuário já estiver logado, redireciona para a home
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
 
         conn = psycopg2.connect(**conn_params)
         c = conn.cursor()
-        c.execute('SELECT id, nome FROM usuarios WHERE email = %s AND senha = %s', (email, senha))
-        usuario = c.fetchone()
+        c.execute('SELECT id, nome, email, senha FROM usuarios WHERE email = %s AND senha = %s', (email, senha))
+        user_data = c.fetchone()
         conn.close()
 
-        if usuario:
-            user_obj = User(id_=usuario[0], nome=usuario[1], email=email, senha=senha)
-            login_user(user_obj)  # <- login "oficial" do flask_login
-            return redirect('/')
+        if user_data:
+            user_obj = User(id_=user_data[0], nome=user_data[1], email=user_data[2], senha=user_data[3])
+            login_user(user_obj)
+            # Redireciona para a página que o usuário tentou acessar antes de ser redirecionado para o login
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('home'))
         else:
-            erro = "Usuário ou senha inválidos."
-            return render_template('login.html', erro=erro)
+            flash('Usuário ou senha inválidos.', 'danger') # Mensagem de erro
+            return render_template('login.html') # Renderiza o template de login novamente
 
     return render_template('login.html')
 
 
-
-
-
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required # Protege a rota: exige login
 def editar(id):
-    if 'usuario_id' not in session:
-        return redirect('/login')
-
-    usuario_id = session['usuario_id']
+    usuario_id = current_user.id # Pega o ID do usuário logado
     conn = psycopg2.connect(**conn_params)
     c = conn.cursor()
 
-    # Verifica se a licença pertence ao usuário
+    # Verifica se a licença pertence ao usuário logado
     c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = %s AND usuario_id = %s', (id, usuario_id))
     licenca = c.fetchone()
 
     if not licenca:
         conn.close()
-        return "Licença não encontrada ou acesso negado"
+        flash('Licença não encontrada ou você não tem permissão para editá-la.', 'danger')
+        return redirect(url_for('home'))
 
     if request.method == 'POST':
         nome = request.form['nome']
@@ -194,42 +212,24 @@ def editar(id):
         ''', (nome, vencimento, dias_antes, id, usuario_id))
         conn.commit()
         conn.close()
-        return redirect('/')
+        flash('Licença atualizada com sucesso!', 'success')
+        return redirect(url_for('home'))
 
     conn.close()
     return render_template('editar.html', id=id, nome=licenca[0], vencimento=licenca[1], dias_antes=licenca[2])
 
 
+@app.route('/logout')
+@login_required # Exige login para fazer logout
+def logout():
+    logout_user()  # Limpa o usuário da sessão do Flask-Login
+    session.clear()  # Limpa toda a sessão do Flask
+    flash('Você foi desconectado com sucesso.', 'info') # Mensagem de logout
+    return redirect(url_for('login'))
 
+
+# Chama criar_tabela apenas uma vez, na inicialização do app
 criar_tabela()
 
-class User(UserMixin):
-    def __init__(self, id_, nome, email, senha):
-        self.id = id_
-        self.nome = nome
-        self.email = email
-        self.senha = senha
-
-@login_manager.user_loader
-def load_user(user_id):
-    conn = psycopg2.connect(**conn_params)
-    c = conn.cursor()
-    c.execute('SELECT id, nome, email, senha FROM usuarios WHERE id = %s', (int(user_id),))
-    user = c.fetchone()
-    conn.close()
-    if user:
-        return User(*user)
-    return None
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()  # limpa o flask_login
-    session.clear()  # limpa toda a session do Flask
-    return redirect('/login')
-
-
-
-# Descomente se quiser rodar localmente:
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=10000)
+if __name__ == '__main__':
+    app.run(debug=True) # Em produção, mude debug para False
