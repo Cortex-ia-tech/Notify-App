@@ -109,8 +109,15 @@ def cadastrar():
 
 
 
+from flask_login import current_user
+
 @app.route('/registrar', methods=['GET', 'POST'])
+@login_required
 def registrar():
+    # Somente o usuário autorizado pode acessar
+    if current_user.email != 'leonardomoreira@petroserra.com':
+        return redirect('/')
+
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
@@ -127,8 +134,9 @@ def registrar():
         conn.close()
 
         return redirect('/')
-    
+
     return render_template('registrar.html')
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
