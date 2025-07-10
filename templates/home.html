@@ -15,19 +15,32 @@
     </style>
 </head>
 <body>
-    {% if session.nome_usuario %}
+    {# Verifica se o usuário está autenticado usando current_user.is_authenticated #}
+    {% if current_user.is_authenticated %}
     <div class="usuario-logado">
-        Olá {{ session.nome_usuario }}, se precisar de ajuda, não hesite em
+        {# Acessa o nome do usuário diretamente de current_user #}
+        Olá {{ current_user.nome }}, se precisar de ajuda, não hesite em
         <a href="/suporte">clicar aqui</a>
         <p style="font-size: 13px; text-align: right; margin-right: 20px;">
-        <a href="/logout" style="color: red;">Sair da conta</a>
+        <a href="{{ url_for('logout') }}" style="color: red;">Sair da conta</a> {# Usa url_for para o logout #}
         </p>
     </div>
     {% endif %}
 
+    {# Adiciona o bloco para exibir mensagens flash #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     <h1>Bem-vindo ao CodNotify</h1>
     <p style="margin-top: 10px;">
-        <a href="/cadastrar">
+        <a href="{{ url_for('cadastrar') }}"> {# Usa url_for para o cadastrar #}
             <button style="padding: 10px 20px; font-size: 14px;">+ Cadastrar nova licença</button>
         </a>
     </p>
@@ -39,8 +52,8 @@
         {% if a_vencer %}
             <ul>
             {% for id_, nome, data in a_vencer %}
-                <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }} 
-                    - <a href="/editar/{{ id_ }}">Editar</a>
+                <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }}
+                    - <a href="{{ url_for('editar', id=id_) }}">Editar</a> {# Usa url_for para o editar #}
                 </li>
             {% endfor %}
             </ul>
@@ -55,7 +68,7 @@
             <ul>
             {% for id_, nome, data in vencidas %}
                 <li>{{ nome }} - venceu em {{ data.strftime('%d/%m/%Y') }}
-                    - <a href="/editar/{{ id_ }}">Editar</a>
+                    - <a href="{{ url_for('editar', id=id_) }}">Editar</a> {# Usa url_for para o editar #}
                 </li>
             {% endfor %}
             </ul>
