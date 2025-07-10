@@ -3,80 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <title>CodNotify - Home</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Estilos Globais e Reset */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte moderna e limpa */
             margin: 0;
-            padding-top: 70px; /* Space for the fixed header */
-            background-color: #f4f7f6;
-            color: #333;
+            padding-top: 70px; /* Espaço para o cabeçalho fixo */
+            background-color: #f8f9fa; /* Fundo suave */
+            color: #343a40; /* Cor de texto principal */
+            line-height: 1.6;
         }
 
-        /* Fixed Header */
+        a {
+            text-decoration: none;
+            color: inherit; /* Links herdam a cor do texto pai por padrão */
+        }
+
+        /* --- Barra de Navegação Fixa (Header) --- */
         .fixed-header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* Fundo branco para a barra */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sombra suave para elevação */
             padding: 10px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000;
+            z-index: 1000; /* Garante que fique acima de outros elementos */
         }
 
         .header-left .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4CAF50; /* A pleasant green */
-            text-decoration: none;
+            font-size: 28px; /* Tamanho maior para o logo */
+            font-weight: 700; /* Mais encorpado */
+            color: #28a745; /* Verde vibrante para a marca */
+            transition: color 0.3s ease;
+        }
+
+        .header-left .logo:hover {
+            color: #218838; /* Escurece um pouco ao passar o mouse */
         }
 
         .header-right {
-            position: relative;
+            position: relative; /* Para o posicionamento do dropdown */
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px; /* Espaçamento entre o nome e o ícone */
+        }
+
+        /* Novo estilo para a área clicável do usuário */
+        .header-right .username-wrapper {
+            display: flex;
+            align-items: center;
+            cursor: pointer; /* Indica que é clicável */
+            padding: 5px 10px; /* Adiciona um padding para a área clicável */
+            border-radius: 20px; /* Arredonda as bordas */
+            transition: background-color 0.3s;
+        }
+
+        .header-right .username-wrapper:hover {
+            background-color: #f0f2f5; /* Fundo suave ao passar o mouse */
         }
 
         .header-right .username {
-            font-size: 16px;
+            font-size: 15px;
             color: #555;
-            margin-right: 10px;
+            white-space: nowrap; /* Impede que o nome quebre a linha */
+            margin-right: 8px; /* Espaço entre o nome e o ícone */
         }
 
         .header-right .icon-button {
             background: none;
             border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: #555;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.3s;
+            font-size: 22px; /* Tamanho do ícone */
+            color: #6c757d; /* Cor cinza sutil para o ícone */
+            /* Removido padding e border-radius daqui, movido para username-wrapper */
+            transition: color 0.3s;
         }
 
         .header-right .icon-button:hover {
-            background-color: #eee;
+            color: #343a40; /* Escurece o ícone ao passar o mouse */
         }
 
+        /* Dropdown Menu */
         .dropdown-menu {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 10px); /* Posiciona ligeiramente abaixo do botão */
             right: 0;
             background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-            min-width: 150px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Sombra mais pronunciada */
+            border-radius: 8px;
+            overflow: hidden; /* Garante que os cantos arredondados funcionem */
+            opacity: 0; /* Começa invisível */
+            visibility: hidden; /* Oculta para acessibilidade */
+            transform: translateY(15px); /* Efeito de deslize para baixo */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
+            min-width: 180px;
             z-index: 1001;
+            padding: 5px 0;
         }
 
         .dropdown-menu.show {
@@ -87,74 +113,123 @@
 
         .dropdown-menu a {
             display: block;
-            padding: 10px 15px;
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background-color 0.2s;
+            padding: 12px 20px;
+            color: #343a40;
+            font-size: 15px;
+            transition: background-color 0.2s, color 0.2s;
         }
 
         .dropdown-menu a:hover {
-            background-color: #f0f0f0;
+            background-color: #e9ecef; /* Fundo suave ao passar o mouse */
+            color: #007bff; /* Azul para links em destaque */
         }
 
         .dropdown-menu a.logout {
-            color: red;
+            color: #dc3545; /* Vermelho para a opção de logout */
         }
 
-        /* Main Content */
+        .dropdown-menu a.logout:hover {
+            background-color: #ffebe9; /* Fundo vermelho suave para logout */
+            color: #c82333;
+        }
+
+        /* Estilos para botões de Login/Registrar se o usuário NÃO estiver logado */
+        .header-right .button-login,
+        .header-right .button-register {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header-right .button-login {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+        }
+
+        .header-right .button-login:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .header-right .button-register {
+            background-color: transparent;
+            color: #007bff;
+            border: 1px solid #007bff;
+            margin-left: 10px;
+        }
+
+        .header-right .button-register:hover {
+            background-color: #e6f2ff;
+            color: #0056b3;
+        }
+
+        /* --- Conteúdo Principal --- */
         .container {
-            max-width: 960px;
-            margin: 20px auto;
-            padding: 0 20px;
+            max-width: 960px; /* Largura máxima do conteúdo */
+            margin: 20px auto; /* Centraliza na página */
+            padding: 0 20px; /* Padding interno para as bordas */
         }
 
         h1 {
-            color: #2c3e50;
+            color: #2c3e50; /* Título principal */
+            text-align: center;
+            margin-top: 40px; /* Espaçamento após o header */
+            margin-bottom: 20px;
+            font-size: 2.5em; /* Tamanho maior para o H1 */
+            font-weight: 600;
+        }
+
+        .description-text {
             text-align: center;
             margin-bottom: 30px;
+            color: #555;
+            font-size: 1.1em;
         }
 
         .button-section {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px; /* Mais espaço antes dos quadros */
         }
 
         .button-section button {
-            padding: 12px 25px;
-            font-size: 16px;
-            background-color: #4CAF50;
+            padding: 14px 30px; /* Botão maior e mais clicável */
+            font-size: 17px;
+            background-color: #28a745; /* Mesma cor verde do logo */
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px; /* Bordas mais arredondadas */
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2); /* Sombra para o botão */
         }
 
         .button-section button:hover {
-            background-color: #45a049;
+            background-color: #218838;
+            transform: translateY(-2px); /* Pequeno efeito de elevação */
         }
 
-        p {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #555;
-        }
-
+        /* --- Quadros de Licenças --- */
         .quadro {
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            padding: 25px;
+            border-radius: 10px; /* Cantos arredondados */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* Sombra mais definida */
+            padding: 30px; /* Mais padding interno */
             margin-bottom: 30px;
         }
 
         .quadro h2 {
             color: #34495e;
             margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef; /* Linha divisória suave */
+            padding-bottom: 15px;
+            font-size: 1.6em;
+            font-weight: 500;
         }
 
         .quadro ul {
@@ -163,24 +238,26 @@
         }
 
         .quadro li {
-            padding: 10px 0;
-            border-bottom: 1px dashed #eee;
+            padding: 12px 0;
+            border-bottom: 1px dashed #e0e0e0; /* Linha tracejada suave */
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 1.05em;
         }
 
         .quadro li:last-child {
-            border-bottom: none;
+            border-bottom: none; /* Remove a borda do último item */
         }
 
         .quadro li a {
             color: #007bff;
-            text-decoration: none;
-            font-size: 14px;
+            font-size: 0.95em;
+            transition: color 0.2s;
         }
 
         .quadro li a:hover {
+            color: #0056b3;
             text-decoration: underline;
         }
 
@@ -188,38 +265,46 @@
             text-align: center;
             color: #777;
             font-style: italic;
+            padding: 10px 0;
         }
 
+        /* --- Rodapé --- */
         footer {
-            background-color: #f0f0f0;
-            padding: 20px;
-            margin-top: 50px;
-            color: #686868;
-            font-size: 14px;
+            background-color: #e9ecef; /* Fundo suave para o rodapé */
+            padding: 25px;
+            margin-top: 60px; /* Mais espaço acima do rodapé */
+            color: #6c757d;
+            font-size: 13px;
             text-align: center;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid #dee2e6; /* Borda superior */
         }
     </style>
 </head>
 <body>
     <header class="fixed-header">
         <div class="header-left">
-            <a href="#" class="logo">CodNotify</a> </div>
+            <a href="{{ url_for('home') }}" class="logo">CodNotify</a> </div>
         <div class="header-right">
             {# Verifica se o usuário está autenticado usando current_user.is_authenticated #}
             {% if current_user.is_authenticated %}
-            <span class="username">Olá {{ current_user.nome }}</span>
-            <button class="icon-button" onclick="toggleDropdown()">&#9776;</button> <div class="dropdown-menu" id="userDropdown">
-                <a href="/suporte">Falar com suporte</a>
+            <div class="username-wrapper" onclick="toggleDropdown()">
+                <span class="username">Olá {{ current_user.nome }}</span>
+                <i class="fas fa-user-circle icon-button"></i>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+                <a href="{{ url_for('suporte') }}">Falar com suporte</a>
                 <a href="{{ url_for('logout') }}" class="logout">Sair da conta</a>
             </div>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="button-login">Entrar</a>
+            <a href="{{ url_for('registrar') }}" class="button-register">Registrar</a>
             {% endif %}
         </div>
     </header>
 
     <div class="container">
-        <h1>Notify</h1>
-        <p>Este será seu painel de controle para gerenciar as licenças.</p>
+        <h1>Bem-vindo ao Notify</h1>
+        <p class="description-text">Este é o seu painel de controle para gerenciar suas licenças e lembretes de forma eficiente.</p>
 
         <div class="button-section">
             <a href="{{ url_for('cadastrar') }}">
@@ -239,7 +324,7 @@
                 {% endfor %}
                 </ul>
             {% else %}
-                <p>Nenhuma licença a vencer.</p>
+                <p>Nenhuma licença a vencer nos próximos dias.</p>
             {% endif %}
         </div>
 
@@ -255,7 +340,7 @@
                 {% endfor %}
                 </ul>
             {% else %}
-                <p>Nenhuma licença vencida.</p>
+                <p>Parabéns! Nenhuma licença vencida encontrada.</p>
             {% endif %}
         </div>
     </div>
@@ -267,23 +352,23 @@
     </footer>
 
     <script>
-    function toggleDropdown() {
-        document.getElementById("userDropdown").classList.toggle("show");
-    }
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
 
-    // Fecha o dropdown se o usuário clicar fora dele
-    window.onclick = function(event) {
-        // Verifica se o clique não foi no botão do ícone nem em seus descendentes
-        if (!event.target.matches('.icon-button') && !event.target.closest('.icon-button')) {
-            var dropdowns = document.getElementsByClassName("dropdown-menu");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
+        // Fecha o dropdown se o usuário clicar fora dele
+        window.onclick = function(event) {
+            // Verifica se o clique não foi dentro do .username-wrapper (que agora contém o nome e o ícone) E não foi dentro do .dropdown-menu
+            if (!event.target.closest('.username-wrapper') && !event.target.closest('.dropdown-menu')) {
+                var dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
                 }
             }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
