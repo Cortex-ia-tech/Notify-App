@@ -5,82 +5,284 @@
     <title>CodNotify - Home</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        .usuario-logado {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding-top: 70px; /* Space for the fixed header */
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        /* Fixed Header */
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .header-left .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50; /* A pleasant green */
+            text-decoration: none;
+        }
+
+        .header-right {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right .username {
+            font-size: 16px;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .header-right .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #555;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .header-right .icon-button:hover {
+            background-color: #eee;
+        }
+
+        .dropdown-menu {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 100%;
+            right: 0;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            min-width: 150px;
+            z-index: 1001;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
             font-size: 14px;
-            color: #444;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .dropdown-menu a.logout {
+            color: red;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .button-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .button-section button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-section button:hover {
+            background-color: #45a049;
+        }
+
+        p {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #555;
+        }
+
+        .quadro {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .quadro h2 {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .quadro ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .quadro li {
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quadro li:last-child {
+            border-bottom: none;
+        }
+
+        .quadro li a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .quadro li a:hover {
+            text-decoration: underline;
+        }
+
+        .quadro p {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+
+        footer {
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin-top: 50px;
+            color: #686868;
+            font-size: 14px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
         }
     </style>
 </head>
 <body>
-    {# Verifica se o usuário está autenticado usando current_user.is_authenticated #}
-    {% if current_user.is_authenticated %}
-    <div class="usuario-logado">
-        {# Acessa o nome do usuário diretamente de current_user #}
-        Olá {{ current_user.nome }} se precisar de ajuda, não hesite em
-        <a href="/suporte">clicar aqui</a>
-        <p style="font-size: 13px; text-align: right; margin-right: 20px;">
-        <a href="{{ url_for('logout') }}" style="color: red;">Sair da conta</a> {# Usa url_for para o logout #}
-        </p>
-    </div>
-    {% endif %}
+    <header class="fixed-header">
+        <div class="header-left">
+            <a href="#" class="logo">CodNotify</a> </div>
+        <div class="header-right">
+            {# Verifica se o usuário está autenticado usando current_user.is_authenticated #}
+            {% if current_user.is_authenticated %}
+            <span class="username">Olá {{ current_user.nome }}</span>
+            <button class="icon-button" onclick="toggleDropdown()">&#9776;</button> <div class="dropdown-menu" id="userDropdown">
+                <a href="/suporte">Falar com suporte</a>
+                <a href="{{ url_for('logout') }}" class="logout">Sair da conta</a>
+            </div>
+            {% endif %}
+        </div>
+    </header>
 
-    <!-- {# Adiciona o bloco para exibir mensagens flash #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class=flashes>
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %} -->
+    <div class="container">
+        <h1>Notify</h1>
+        <p>Este será seu painel de controle para gerenciar as licenças.</p>
 
-    <h1>Notify</h1>
-    <p style="margin-top: 10px;">
-        <a href="{{ url_for('cadastrar') }}"> {# Usa url_for para o cadastrar #}
-            <button style="padding: 10px 20px; font-size: 14px;">+ Cadastrar novo lembrete</button>
-        </a>
-    </p>
+        <div class="button-section">
+            <a href="{{ url_for('cadastrar') }}">
+                <button>+ Cadastrar novo lembrete</button>
+            </a>
+        </div>
 
-    <p>Este será seu painel de controle para gerenciar as licenças.</p>
+        <div class="quadro">
+            <h2>Licenças a vencer</h2>
+            {% if a_vencer %}
+                <ul>
+                {% for id_, nome, data in a_vencer %}
+                    <li>
+                        <span>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }}</span>
+                        <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nenhuma licença a vencer.</p>
+            {% endif %}
+        </div>
 
-    <div class="quadro">
-        <h2>Licenças a vencer</h2>
-        {% if a_vencer %}
-            <ul>
-            {% for id_, nome, data in a_vencer %}
-                <li>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }}
-                    - <a href="{{ url_for('editar', id=id_) }}">Editar</a> {# Usa url_for para o editar #}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>Nenhuma licença a vencer.</p>
-        {% endif %}
-    </div>
-
-    <div class="quadro">
-        <h2>Licenças vencidas</h2>
-        {% if vencidas %}
-            <ul>
-            {% for id_, nome, data in vencidas %}
-                <li>{{ nome }} - venceu em {{ data.strftime('%d/%m/%Y') }}
-                    - <a href="{{ url_for('editar', id=id_) }}">Editar</a> {# Usa url_for para o editar #}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>Nenhuma licença vencida.</p>
-        {% endif %}
+        <div class="quadro">
+            <h2>Licenças vencidas</h2>
+            {% if vencidas %}
+                <ul>
+                {% for id_, nome, data in vencidas %}
+                    <li>
+                        <span>{{ nome }} - venceu em {{ data.strftime('%d/%m/%Y') }}</span>
+                        <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nenhuma licença vencida.</p>
+            {% endif %}
+        </div>
     </div>
 
-    <footer style="text-align: center; margin-top: 50px;">
-        <p style="font-size: 15px; color: #686868;">
+    <footer>
+        <p>
             SkyNotify 2025 – Desenvolvido por SkyNet Business Intelligence ® <br> Todos os direitos reservados.
         </p>
     </footer>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.icon-button')) {
+                var dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>
