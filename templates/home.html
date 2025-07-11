@@ -15,7 +15,7 @@
             line-height: 1.6;
             /* Novas adições para remover barras de rolagem desnecessárias */
             overflow-x: hidden; /* Garante que não haverá barra de rolagem horizontal */
-            overflow-y: hidden; /* Garante que não haverá barra de rolagem vertical */
+            overflow-y: auto; /* Garante que não haverá barra de rolagem vertical */
         }
 
         a {
@@ -39,7 +39,7 @@
         }
 
         .header-left .logo {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 700;
             color: #28a745;
             transition: color 0.3s ease;
@@ -55,6 +55,12 @@
             align-items: center;
             margin-right: 50px; /* Ajuste para mover o grupo de login/usuário um pouco para a esquerda */
             gap: 15px;
+        }
+
+        .header-left sup {
+            font-size: 0.4em; /* Ajuste este valor para controlar o tamanho */
+            vertical-align: super; /* Garante que ele fique como sobrescrito */
+            margin-left: 2px; /* Pequeno espaçamento à esquerda do símbolo */
         }
 
         /* Novo estilo para a área clicável do usuário */
@@ -201,7 +207,7 @@
         }
 
         .button-section button {
-            padding: 14px 30px;
+            padding: 14px 10px;
             font-size: 17px;
             background-color: #28a745;
             color: white;
@@ -287,7 +293,7 @@
 <body>
     <header class="fixed-header">
         <div class="header-left">
-            <a href="{{ url_for('home') }}" class="logo">Notify</a>
+            <a href="{{ url_for('home') }}" class="logo">Notify<sup>®</sup></a>
         </div>
         <div class="header-right">
             {% if current_user.is_authenticated %}
@@ -307,9 +313,7 @@
     </header>
 
     <div class="container">
-        <h1>Notify</h1>
-        <p class="description-text">Este é o seu painel de controle para gerenciar suas licenças e lembretes de forma eficiente.</p>
-
+        
         <div class="button-section">
             <a href="{{ url_for('cadastrar') }}">
                 <button>+ Cadastrar novo lembrete</button>
@@ -317,7 +321,7 @@
         </div>
 
         <div class="quadro">
-            <h2>Licenças a vencer</h2>
+            <h2>Lembretes ativos:</h2>
             {% if a_vencer %}
                 <ul>
                 {% for id_, nome, data in a_vencer %}
@@ -328,12 +332,12 @@
                 {% endfor %}
                 </ul>
             {% else %}
-                <p>Nenhuma licença a vencer nos próximos dias.</p>
+                <p>Nenhuma lembrete cadastrado.</p>
             {% endif %}
         </div>
 
         <div class="quadro">
-            <h2>Licenças vencidas</h2>
+            <h2>Lembretes expirados:</h2>
             {% if vencidas %}
                 <ul>
                 {% for id_, nome, data in vencidas %}
@@ -344,14 +348,14 @@
                 {% endfor %}
                 </ul>
             {% else %}
-                <p>Parabéns! Nenhuma licença vencida encontrada.</p>
+                <p>Nenhum lembrete expirado.</p>
             {% endif %}
         </div>
     </div>
 
     <footer>
         <p>
-            Notify 2025 – Desenvolvido por SkyNet Business Intelligence ® <br> Todos os direitos reservados.
+            Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
         </p>
     </footer>
 
