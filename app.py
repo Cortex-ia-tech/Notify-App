@@ -223,7 +223,7 @@ def editar(id):
 def logout():
     logout_user()
     session.clear()
-    flash('Você foi desconectado com sucesso.', 'info')
+    flash('Você foi desconectado.', 'info')
     return redirect(url_for('login')) # Redireciona para a página de login após o logout
 
 @app.route('/suporte')

@@ -2,23 +2,184 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Editar Licença</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Editar Lembrete</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Estilos Globais e Reset Básico */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            /* Fundo com imagem e desvanecimento */
+            background-image: url('{{ url_for('static', filename='sua_imagem_de_fundo.jpg') }}'); /* Substitua pelo nome da sua imagem */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+            z-index: 0;
+            background-color: #f0f2f5; /* Cor de fallback */
+
+            display: flex; /* Para centralizar o container */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Pseudo-elemento para criar a sobreposição desvanecida */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(240, 242, 245, 0.7); /* Ajuste a transparência (0.0 a 1.0) */
+            z-index: -1;
+        }
+
+        /* Container principal para o formulário */
+        .main-container {
+            display: flex;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 450px; /* Largura ajustada para a página de formulário */
+            padding: 40px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .main-container h2 { /* Estilo para o título da página de editar */
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        /* Formulário */
+        form {
+            width: 100%;
+            max-width: 320px; /* Largura máxima para o formulário */
+        }
+
+        .input-group {
+            margin-bottom: 25px; /* Espaçamento entre os grupos de input */
+            text-align: left; /* Alinha labels e inputs à esquerda */
+        }
+
+        .input-group label {
+            display: block; /* Cada label em sua própria linha */
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="date"],
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus { /* Estilo de foco genérico para inputs */
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        /* Botão "Salvar Alterações" */
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background-color: #28a745; /* Cor azul do botão */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+            margin-top: 15px;
+            max-width: 320px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #218838; /* Cor azul mais escura no hover */
+            transform: translateY(-2px);
+        }
+
+        /* Estilo para o link "Voltar" */
+        .back-link {
+            margin-top: 25px; /* Espaçamento acima do link */
+            font-size: 0.95em;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .back-link a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        /* Responsividade básica para telas menores */
+        @media (max-width: 768px) {
+            .main-container {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .main-container h2 {
+                font-size: 1.8em;
+            }
+
+            form {
+                max-width: 100%;
+            }
+
+            button[type="submit"] {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Editar Licença</h2>
-    <form method="POST">
-        <label>Nome:</label><br>
-        <input type="text" name="nome" value="{{ nome }}" required><br><br>
+    <div class="main-container">
+        <h2>Editar Licença</h2>
+        <form method="POST">
+            <div class="input-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" value="{{ nome }}" required>
+            </div>
 
-        <label>Vencimento:</label><br>
-        <input type="date" name="vencimento" value="{{ vencimento }}" required><br><br>
+            <div class="input-group">
+                <label>Vencimento:</label>
+                <input type="date" name="vencimento" value="{{ vencimento }}" required>
+            </div>
 
-        <label>Dias antes para aviso:</label><br>
-        <input type="number" name="dias_antes" value="{{ dias_antes }}" required><br><br>
+            <div class="input-group">
+                <label>Dias antes para aviso:</label>
+                <input type="number" name="dias_antes" value="{{ dias_antes }}" required>
+            </div>
 
-        <button type="submit">Salvar Alterações</button>
-    </form>
-    <br>
-    <a href="/">Voltar</a>
+            <button type="submit">Salvar Alterações</button>
+        </form>
+        <p class="back-link"><a href="/">Voltar</a></p>
+    </div>
 </body>
 </html>
