@@ -1,0 +1,248 @@
+/* Estilos Globais e Reset Básico */
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+margin: 0;
+padding: 0;
+background-size: cover; /* Cobre todo o fundo */
+background-position: center center; /* Centraliza a imagem */
+background-repeat: no-repeat; /* Evita repetição da imagem */
+background-attachment: fixed; /* Mantém a imagem fixa ao rolar */
+position: relative; /* Necessário para posicionar o pseudo-elemento */
+z-index: 0; /* Garante que o pseudo-elemento fique por cima */
+background-color: #f0f2f5; /* Cor de fallback suave */
+display: flex; /* Usamos flexbox para centralizar o container principal */
+justify-content: center; /* Centraliza horizontalmente */
+align-items: center; /* Centraliza verticalmente */
+min-height: 100vh; /* Garante que o corpo ocupe 100% da altura da viewport */
+overflow: hidden; /* Remove barras de rolagem indesejadas */
+background-image: url('/static/fundo-body.jpg'); /* Note: o url_for() NÃO é usado aqui, apenas o caminho relativo */
+}
+
+body::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(240, 242, 245, 0.0); /* Cor de fundo do body com transparência. Ajuste a transparência (0.0 a 1.0) */
+z-index: -1; /* Garante que a sobreposição fique atrás do conteúdo */
+}
+
+/* Container principal do login */
+.login-container {
+display: flex; /* Habilita flexbox para os painéis esquerdo e direito */
+background-color: #ffffff; /* Fundo branco para o card de login */
+border-radius: 12px; /* Cantos mais arredondados */
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra mais pronunciada e moderna */
+width: 850px; /* Largura fixa do container total (ajuste conforme necessário) */
+height: 550px; /* Altura fixa do container total (ajuste conforme necessário) */
+overflow: hidden; /* Para garantir que bordas arredondadas e divisória funcionem bem */
+}
+
+/* Painel esquerdo (formulário) */
+.left-panel {
+flex: 1; /* Ocupa o espaço disponível igual ao direito */
+padding: 40px;
+display: flex;
+flex-direction: column; /* Organiza os itens em coluna */
+justify-content: center; /* Centraliza o conteúdo verticalmente */
+align-items: center; /* Centraliza o conteúdo horizontalmente */
+text-align: center; /* Alinha o texto ao centro */
+}
+
+.left-panel h2 {
+color: #333;
+margin-bottom: 30px;
+font-size: 2.2em; /* Título maior */
+font-weight: 700;
+}
+
+/* Estilo para as mensagens de erro/flash */
+.flash-message {
+margin-bottom: 20px;
+padding: 10px 15px;
+border-radius: 8px;
+font-size: 0.95em;
+width: 100%; /* Ocupa a largura total do painel */
+box-sizing: border-box; /* Inclui padding na largura */
+}
+
+.flash-message.error { /* Para mensagens de erro (danger) do Flask flash */
+background-color: #f8d7da;
+color: #721c24;
+border: 1px solid #f5c6cb;
+}
+
+.flash-message.info { /* Para mensagens de informação (info) do Flask flash */
+background-color: #d1ecf1;
+color: #0c5460;
+border: 1px solid #bee5eb;
+}
+
+.flash-message.success { /* Para mensagens de sucesso (success) do Flask flash */
+background-color: #d4edda;
+color: #155724;
+border: 1px solid #c3e6cb;
+}
+
+
+/* Formulário */
+form {
+width: 100%;
+max-width: 320px; /* Largura máxima para o formulário */
+}
+
+.input-group {
+margin-bottom: 25px; /* Espaçamento entre os grupos de input */
+text-align: left; /* Alinha labels e inputs à esquerda */
+}
+
+.input-group label {
+display: block; /* Cada label em sua própria linha */
+margin-bottom: 8px;
+color: #555;
+font-weight: 600;
+font-size: 0.95em;
+}
+
+.input-group input[type="email"],
+.input-group input[type="password"] {
+width: 100%;
+padding: 12px 15px;
+border: 1px solid #ced4da;
+border-radius: 8px; /* Bordas arredondadas para os inputs */
+font-size: 1em;
+box-sizing: border-box; /* Inclui padding na largura total */
+transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-group input[type="email"]:focus,
+.input-group input[type="password"]:focus {
+border-color: #007bff; /* Borda azul ao focar */
+box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra suave ao focar */
+outline: none; /* Remove o outline padrão do navegador */
+}
+
+button[type="submit"] {
+width: 100%;
+padding: 14px;
+background-color: #007bff; /* Azul vibrante */
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 1.1em;
+font-weight: 600;
+cursor: pointer;
+transition: background-color 0.3s ease, transform 0.2s ease;
+box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2); /* Sombra para o botão */
+}
+
+button[type="submit"]:hover {
+background-color: #0056b3; /* Azul mais escuro ao passar o mouse */
+transform: translateY(-2px); /* Efeito de elevação */
+}
+
+.forgot-password {
+margin-top: 15px;
+font-size: 0.9em;
+}
+
+.forgot-password a {
+color: #007bff;
+text-decoration: none;
+transition: color 0.3s;
+}
+
+.forgot-password a:hover {
+color: #0056b3;
+text-decoration: underline;
+}
+
+/* Divisória central */
+.divider {
+width: 2px; /* Largura da linha divisória */
+background-color: #cccccc; /* Cor cinza clara */
+height: 80%; /* Altura da linha (para não ir de ponta a ponta) */
+align-self: center; /* Centraliza a linha verticalmente dentro do flex container */
+border-radius: 1px; /* Bordas arredondadas para a linha */
+}
+
+/* Painel direito (logo) */
+.right-panel {
+flex: 1;
+background-color: #ffffff;
+display: flex; /* Manter display flex para que ele ainda ocupe o espaço */
+flex-direction: column; /* Manter a direção, mas os itens absolutos sairão do fluxo */
+justify-content: center; /* Centraliza o espaço DISPONÍVEL, mas não os itens absolutos */
+align-items: center; /* Centraliza o espaço DISPONÍVEL, mas não os itens absolutos */
+padding: 20px;
+gap: 0; /* Remover o gap, pois os itens serão posicionados individualmente */
+position: relative; /* CRÍTICO: Define o .right-panel como o contexto de posicionamento */
+overflow: hidden; /* Garante que nada transborde se for posicionado fora */
+}
+
+/* NOVO ESTILO PARA O H1 NO PAINEL DIREITO */
+.right-panel .logo-title {
+font-size: 80px;
+font-weight: 700;
+color: #28a745;
+position: absolute; /* Torna o elemento independente do fluxo */
+/* Ajuste as posições para centralizar ou mover para onde quiser */
+top: 12%; /* Por exemplo, 15% do topo do .right-panel */
+left: 50%;
+transform: translateX(-50%); /* Centraliza horizontalmente de forma precisa */
+/* Remova qualquer margin-top negativo, pois o top já faz o trabalho */
+margin-top: 0; /* Garante que não haja margens extras */
+}
+
+.right-panel img {
+max-width: 40%;
+max-height: 40%;
+object-fit: contain;
+position: absolute; /* Torna o elemento independente do fluxo */
+/* Ajuste as posições para centralizar ou mover para onde quiser */
+bottom: 10%; /* Por exemplo, 15% da parte inferior do .right-panel */
+left: 50%;
+transform: translateX(-50%); /* Centraliza horizontalmente de forma precisa */
+margin-top: 0; /* Garante que não haja margens extras */
+}
+
+/* NOVO ESTILO PARA O SÍMBOLO DE MARCA REGISTRADA */
+.logo-title sup {
+font-size: 0.25em; /* Ajuste este valor para controlar o tamanho (0.5em é 50% do tamanho do pai) */
+vertical-align: super; /* Garante que ele fique como sobrescrito */
+margin-left: 2px; /* Pequeno espaçamento à esquerda do símbolo */
+}
+
+/* Responsividade básica para telas menores */
+@media (max-width: 768px) {
+.login-container {
+    flex-direction: column; /* Empilha os painéis em telas pequenas */
+    width: 95%; /* Ocupa quase toda a largura */
+    height: auto; /* Altura automática */
+    margin: 20px 0; /* Margem vertical para não colar nas bordas */
+}
+
+.left-panel, .right-panel {
+    width: 100%;
+    padding: 30px;
+}
+
+.divider {
+    width: 80%; /* Linha divisória horizontal */
+    height: 2px;
+    margin: 20px 0; /* Espaçamento da divisória */
+}
+
+.right-panel {
+    min-height: 200px; /* Altura mínima para o painel da logo em mobile */
+}
+
+.left-panel h2 {
+    font-size: 1.8em;
+}
+.right-panel .logo-title { /* Ajuste do tamanho da fonte em telas menores */
+    font-size: 24px;
+}
+}

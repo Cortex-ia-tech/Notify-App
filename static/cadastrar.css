@@ -1,0 +1,147 @@
+/* Estilos Globais e Reset Básico */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    z-index: 0;
+    background-color: #f0f2f5; /* Cor de fallback */
+    display: flex; /* Para centralizar o container */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* Pseudo-elemento para criar a sobreposição desvanecida */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(240, 242, 245, 0.7); /* Ajuste a transparência (0.0 a 1.0) */
+    z-index: -1;
+}
+
+/* Container principal para o formulário */
+.main-container {
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    /* Ajustado para ser mais flexível para uma única coluna, ou você pode definir uma largura fixa */
+    width: 450px; /* Largura ajustada para a página de cadastro */
+    padding: 40px; /* Preenchimento dentro do container */
+    flex-direction: column; /* Conteúdo em coluna */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.main-container h1 { /* Estilo para o título da página de cadastro */
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    font-weight: 700;
+}
+
+/* Formulário */
+form {
+    width: 100%;
+    max-width: 320px; /* Largura máxima para o formulário */
+}
+
+.input-group {
+    margin-bottom: 25px; /* Espaçamento entre os grupos de input */
+    text-align: left; /* Alinha labels e inputs à esquerda */
+}
+
+.input-group label {
+    display: block; /* Cada label em sua própria linha */
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.input-group input[type="text"],
+.input-group input[type="date"],
+.input-group input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-group input:focus { /* Estilo de foco genérico para inputs */
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    margin-top: 15px; /* Espaço acima do botão */
+    max-width: 320px; /* Garante que o botão tenha a mesma largura máxima que o formulário */
+}
+
+button[type="submit"]:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Estilo para o link "Voltar para Home" */
+.back-link {
+    margin-top: 25px; /* Espaçamento acima do link */
+    font-size: 0.95em;
+}
+
+.back-link a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.back-link a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Responsividade básica para telas menores */
+@media (max-width: 768px) {
+    .main-container {
+        width: 95%; /* Ocupa quase toda a largura */
+        padding: 20px;
+    }
+
+    .main-container h1 {
+        font-size: 1.8em;
+    }
+
+    form {
+        max-width: 100%; /* Permite que o formulário ocupe toda a largura disponível */
+    }
+
+    button[type="submit"] {
+        max-width: 100%;
+    }
+}
