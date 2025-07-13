@@ -14,7 +14,7 @@ body {
     justify-content: center; /* Centraliza horizontalmente */
     align-items: center; /* Centraliza verticalmente */
     min-height: 100vh; /* Garante que o corpo ocupe 100% da altura da viewport */
-    /* overflow: hidden; /* REMOVIDO: Remove barras de rolagem indesejadas - pode cortar conteúdo em mobile */ 
+    /* overflow: hidden; /* REMOVIDO: Remove barras de rolagem indesejadas - pode cortar conteúdo em mobile */
     background-image: url('/static/fundo-body.jpg'); /* Note: o url_for() NÃO é usado aqui, apenas o caminho relativo */
 }
 
@@ -212,63 +212,94 @@ button[type="submit"]:hover {
     margin-left: 2px; /* Pequeno espaçamento à esquerda do símbolo */
 }
 
-/* --- */
-@media (max-width: 768px) {
+/* --- Media Query para Telas Menores --- */
+@media (max-width: 800px) {
+    /* Adiciona box-sizing a todos os elementos para um controle de layout mais previsível */
+    /* Isso é uma boa prática e deve ser adicionado no topo do seu CSS, fora de media queries */
+    /* Ex: * { box-sizing: border-box; } */
+    /* Mas, para a finalidade de correção imediata, vamos adicioná-lo aqui */
+    .login-container,
+    .left-panel,
+    .right-panel,
+    form,
+    .input-group,
+    .input-group label,
+    .input-group input,
+    button[type="submit"],
+    .flash-message {
+        box-sizing: border-box;
+    }
+
     /* Ajustes no Body para Mobile */
     body {
-        /* Permite rolagem se o conteúdo for maior que a viewport */
         overflow-y: auto;
-        /* Alinha o conteúdo ao topo em vez de centralizar verticalmente */
         align-items: flex-start;
-        padding: 20px 0; /* Adiciona padding vertical para o conteúdo não colar nas bordas da tela */
+        padding: 20px 0;
     }
 
     /* Ajustes no Container Principal do Login */
     .login-container {
-        flex-direction: column; /* Empilha os painéis em telas pequenas */
-        width: 95%; /* Ocupa quase toda a largura */
-        height: auto; /* IMPORTANTE: Altura automática para evitar corte de conteúdo */
-        max-width: 400px; /* Adiciona uma largura máxima para o container em mobile, se desejar */
-        margin: 20px auto; /* Centraliza o container e adiciona margens superior/inferior */
+        flex-direction: column;
+        width: 95%;
+        height: auto;
+        /* max-width: 400px; /* Mantemos, mas o padding interno do left-panel é mais crítico */
+        margin: 20px auto;
     }
 
     /* Ajustes nos Painéis Esquerdo e Direito */
     .left-panel,
     .right-panel {
         width: 100%;
-        padding: 30px;
-        /* Removendo alinhamentos absolutos para um fluxo mais natural em mobile no right-panel */
-        position: static; /* Volta para o posicionamento padrão para mobile */
+        /* Ajuste o padding para permitir que o conteúdo do formulário se ajuste */
+        /* Reduzir o padding horizontal do left-panel se ainda estiver apertado */
+        padding: 20px; /* De 30px para 20px, ou até menos se necessário (ex: 15px) */
+        position: static;
         justify-content: center;
         align-items: center;
         text-align: center;
-        /* Adicionado para garantir que o painel direito tenha um mínimo de altura */
-        min-height: 200px;
+        min-height: 180px;
     }
 
     .divider {
-        width: 80%; /* Linha divisória horizontal */
+        width: 80%;
         height: 2px;
-        margin: 20px 0; /* Espaçamento da divisória */
+        margin: 20px 0;
     }
 
-    /* Ajustes específicos para o conteúdo do Right Panel em Mobile */
-    .right-panel .logo-title {
-        font-size: 2.5em; /* Aumenta um pouco o tamanho da fonte para melhor leitura em mobile */
-        position: static; /* Volta para o fluxo normal do documento */
-        transform: none; /* Remove a transformação de centralização absoluta */
-        margin-bottom: 20px; /* Adiciona espaçamento abaixo do título */
+    /* Ajustes do FORMULÁRIO especificamente para Mobile */
+    form {
+        width: 100%; /* Ocupa 100% da largura do .left-panel */
+        max-width: none; /* REMOVE QUALQUER LIMITAÇÃO DE LARGURA FIXA */
+        /* Remova o padding lateral do form se o left-panel já tiver um padding adequado */
+        padding: 0; /* REMOVIDO: padding: 0 10px; */
+        /* O padding será gerenciado pelo .left-panel */
     }
 
-    .right-panel img {
-        max-width: 60%; /* Aumenta o tamanho máximo da imagem para mobile */
-        max-height: 150px; /* Limita a altura para evitar que a imagem fique muito grande */
-        position: static; /* Volta para o fluxo normal do documento */
-        transform: none; /* Remove a transformação de centralização absoluta */
-        margin-top: 0;
+    /* Garante que inputs e botões ocupem a largura total do FORM */
+    .input-group input[type="email"],
+    .input-group input[type="password"],
+    button[type="submit"] {
+        width: 100%;
+        /* box-sizing: border-box; já deveria estar aqui */
     }
 
     .left-panel h2 {
         font-size: 1.8em;
+    }
+
+    /* Ajustes específicos para o conteúdo do Right Panel em Mobile */
+    .right-panel .logo-title {
+        font-size: 2.2em;
+        position: static;
+        transform: none;
+        margin-bottom: 15px;
+    }
+
+    .right-panel img {
+        max-width: 50%;
+        max-height: 120px;
+        position: static;
+        transform: none;
+        margin-top: 0;
     }
 }
