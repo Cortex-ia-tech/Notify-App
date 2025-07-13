@@ -12,11 +12,20 @@
         <div class="left-panel">
             <h2>Bem-vindo de volta!</h2> {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
+                    <div class="flash-messages-container">
                     {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">{{ message }}</div>
+                        {# Adicione uma condição para pular a mensagem específica na home #}
+                        {% if request.path == '/' and message == 'Please log in to access this page.' %}
+                            {# Não renderiza esta mensagem específica na home #}
+                        {% else %}
+                            <div class="flash-message {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endif %}
                     {% endfor %}
+                    </div>
                 {% endif %}
-            {% endwith %}
+                {% endwith %}
 
             <form method="POST" action="{{ url_for('login') }}">
                 <div class="input-group">
