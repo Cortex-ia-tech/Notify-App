@@ -1,0 +1,129 @@
+/* static/form_styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px; /* Ajuste conforme necessário */
+    max-width: 90%;
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-container .flash-messages-container {
+    margin-bottom: 15px;
+}
+
+.form-container .flash-message {
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.form-container .flash-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form-container .flash-message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.form-container .flash-message.warning {
+    background-color: #fff3cd;
+    color: #85640c;
+    border: 1px solid #ffeeba;
+}
+
+.form-container .flash-message.danger,
+.form-container .flash-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.form-container .input-group {
+    margin-bottom: 15px;
+}
+
+.form-container .input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
+}
+
+.form-container .input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.form-container button {
+    background-color: #007bff; /* Cor primária - ajuste para a cor dos seus botões */
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+.form-container button:hover {
+    background-color: #0056b3; /* Cor mais escura no hover */
+}
+
+.form-container .form-links {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.form-container .form-links a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.form-container .form-links a:hover {
+    text-decoration: underline;
+}
+
+.form-container p {
+    text-align: center;
+    margin-top: 15px;
+    color: #777;
+}
+
+.form-container p a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.form-container p a:hover {
+    text-decoration: underline;
+}
