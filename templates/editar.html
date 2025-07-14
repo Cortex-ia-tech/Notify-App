@@ -1,13 +1,15 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Lembrete</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='cadastrar.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Editar Lembrete{% endblock %}
+
+{% block head_css %}
+    {{ super() }} {# Importante: Carrega o CSS do base.html (home.css) primeiro #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='cadastrar.css') }}"> {# Usa o mesmo CSS de cadastrar, se for o caso #}
+    {# Se tiver um CSS específico para editar.css, adicione-o aqui também: #}
+    {# <link rel="stylesheet" href="{{ url_for('static', filename='editar.css') }}"> #}
+{% endblock %}
+
+{% block body_content %}
     <div class="main-container">
         <h1>Editar Lembrete</h1>
 
@@ -34,25 +36,29 @@
                     {% for tag in marcadores_existentes %}
                         <option value="{{ tag }}" {% if tag == marcador_atual %}selected{% endif %}>{{ tag }}</option>
                     {% endfor %}
-                    <option value="novo_marcador">*** Novo Marcador ***</option>
+                    <option value="novo_marcador" {% if marcador_atual == 'novo_marcador' %}selected{% endif %}>*** Novo Marcador ***</option> {# Adicionado selected para caso marcador_atual seja 'novo_marcador' #}
                 </select>
             </div>
 
             <div class="input-group" id="novo_marcador_input_group" style="display: none;">
                 <label for="novo_marcador_input">Nome do Novo Marcador:</label>
-                <input type="text" id="novo_marcador_input" name="novo_marcador_input" placeholder="Digite o nome do novo marcador">
+                {# Se o marcador_atual já for 'novo_marcador', preenche o campo com o valor do marcador_atual #}
+                <input type="text" id="novo_marcador_input" name="novo_marcador_input" placeholder="Digite o nome do novo marcador" value="{% if marcador_atual and 'novo_marcador' in marcadores_existentes and marcador_atual == 'novo_marcador' %}{{ '' }}{% elif marcador_atual and marcador_atual not in marcadores_existentes %}{{ marcador_atual }}{% endif %}">
             </div>
             <button type="submit">Salvar Alterações</button>
         </form>
 
         <p class="back-link"><a href="/">← Voltar para Home</a></p>
     </div>
+{% endblock %}
 
+{% block body_scripts %}
+    {# JavaScript específico para esta página #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Garante que a lógica é executada quando a página é carregada
             // Isso é importante se o marcador_atual já for "Novo Marcador" ou se o campo deve aparecer
-            toggleNewTagInput(); 
+            toggleNewTagInput();
         });
 
         function toggleNewTagInput() {
@@ -70,5 +76,4 @@
             }
         }
     </script>
-    </body>
-</html>
+{% endblock %}

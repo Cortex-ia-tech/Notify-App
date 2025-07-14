@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    {# Bloco para o título específico da página #}
+    <title>{% block title %}Notify{% endblock %}</title>
+
+    {# Bloco para CSS específico da página (se necessário, mas evite se puder usar home.css) #}
+    {% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}"> {# CSS padrão para todas as páginas #}
+    {% endblock %}
+</head>
+<body>
+    {# >>> INÍCIO DO LOADER (AGORA NA BASE) <<< #}
+    <div id="loader-wrapper">
+        <div class="loader"></div>
+        <p>Carregando...</p>
+    </div>
+    {# >>> FIM DO LOADER <<< #}
+
+    {# Bloco para o conteúdo principal da página #}
+    {% block body_content %}
+    {# O conteúdo específico de cada página (home, cadastrar, etc.) virá aqui #}
+    {% endblock %}
+
+    {# >>> INÍCIO DO SCRIPT PARA O LOADER (AGORA NA BASE) <<< #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loaderWrapper = document.getElementById('loader-wrapper');
+            if (loaderWrapper) {
+                loaderWrapper.classList.add('hidden');
+                loaderWrapper.addEventListener('transitionend', function() {
+                    if (loaderWrapper.classList.contains('hidden')) {
+                        loaderWrapper.remove();
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('load', function() {
+            var loaderWrapper = document.getElementById('loader-wrapper');
+            if (loaderWrapper) {
+                loaderWrapper.classList.add('hidden');
+            }
+        });
+    </script>
+    {# >>> FIM DO SCRIPT PARA O LOADER <<< #}
+
+    {# Bloco para scripts JavaScript específicos da página #}
+    {% block body_scripts %}{% endblock %}
+</body>
+</html>
