@@ -61,7 +61,7 @@ def forgot_password_route():
                 <p>Para redefinir sua senha, clique no link abaixo:</p>
                 <p><a href="{reset_url}">Redefinir Minha Senha</a></p>
                 <p>Este link é válido por 1 hora. Se você não solicitou isso, por favor, ignore este e-mail.</p>
-                <p>Atenciosamente,<br>Sua Equipe</p>
+                <p>Atenciosamente,<br>Equipe Notify</p>
                 """
                 current_app.mail.send(msg)
                 flash(*flash_message)
