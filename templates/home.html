@@ -1,14 +1,14 @@
-{% extends "base.html" %}
-
-{% block title %}Notify - Home{% endblock %}
-
-{# Se você tiver algum CSS que seja EXCLUSIVO da home e não esteja no home.css principal, pode adicionar aqui. Caso contrário, este bloco pode ser omitido. #}
-{# {% block head_css %}
-    {{ super() }} {# Mantém o CSS do base.html #}
-    {# <link rel="stylesheet" href="{{ url_for('static', filename='home_extra.css') }}"> #}
-{# {% endblock %} #}
-
-{% block body_content %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notify - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
     <header class="fixed-header">
         <div class="header-left">
             <a href="{{ url_for('home') }}" class="logo">Notify<sup>®</sup></a>
@@ -89,15 +89,14 @@
             Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
         </p>
     </footer>
-{% endblock %}
 
-{% block body_scripts %}
     <script>
         function toggleDropdown() {
             document.getElementById("userDropdown").classList.toggle("show");
         }
 
         window.onclick = function(event) {
+            // Fecha o dropdown se o clique for fora dele ou do botão de acionamento
             if (!event.target.closest('.username-wrapper') && !event.target.closest('.dropdown-menu')) {
                 var dropdowns = document.getElementsByClassName("dropdown-menu");
                 for (var i = 0; i < dropdowns.length; i++) {
@@ -109,4 +108,5 @@
             }
         }
     </script>
-{% endblock %}
+</body>
+</html>
