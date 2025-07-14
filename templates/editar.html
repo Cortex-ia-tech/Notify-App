@@ -2,33 +2,73 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Editar Lembrete</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Lembrete</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='editar.css') }}">
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='cadastrar.css') }}">
 </head>
 <body>
     <div class="main-container">
-        <h2>Editar Lembrete</h2>
-        <form method="POST">
+        <h1>Editar Lembrete</h1>
+
+        <form method="POST" action="{{ url_for('editar', id=id) }}">
             <div class="input-group">
-                <label>Nome:</label>
-                <input type="text" name="nome" value="{{ nome }}" required>
+                <label for="nome_licenca">Nome do lembrete:</label>
+                <input type="text" id="nome_licenca" name="nome" value="{{ nome }}" required>
             </div>
 
             <div class="input-group">
-                <label>Vencimento:</label>
-                <input type="date" name="vencimento" value="{{ vencimento }}" required>
+                <label for="data_vencimento">Data de vencimento:</label>
+                <input type="date" id="data_vencimento" name="vencimento" value="{{ vencimento.strftime('%Y-%m-%d') }}" required>
             </div>
 
             <div class="input-group">
-                <label>Dias antes para aviso:</label>
-                <input type="number" name="dias_antes" value="{{ dias_antes }}" required>
+                <label for="dias_antes">Alerta com antecedência (dias):</label>
+                <input type="number" id="dias_antes" name="dias_antes" min="1" placeholder="Ex: 30" value="{{ dias_antes }}" required>
             </div>
 
+            <div class="input-group">
+                <label for="marcador_existente">Marcador (categoria):</label>
+                <select id="marcador_existente" name="marcador_existente" required onchange="toggleNewTagInput()">
+                    <option value="">Selecione um marcador</option>
+                    {% for tag in marcadores_existentes %}
+                        <option value="{{ tag }}" {% if tag == marcador_atual %}selected{% endif %}>{{ tag }}</option>
+                    {% endfor %}
+                    <option value="novo_marcador">*** Novo Marcador ***</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="novo_marcador_input_group" style="display: none;">
+                <label for="novo_marcador_input">Nome do Novo Marcador:</label>
+                <input type="text" id="novo_marcador_input" name="novo_marcador_input" placeholder="Digite o nome do novo marcador">
+            </div>
             <button type="submit">Salvar Alterações</button>
         </form>
-        <p class="back-link"><a href="/">Voltar</a></p>
+
+        <p class="back-link"><a href="/">← Voltar para Home</a></p>
     </div>
-</body>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Garante que a lógica é executada quando a página é carregada
+            // Isso é importante se o marcador_atual já for "Novo Marcador" ou se o campo deve aparecer
+            toggleNewTagInput(); 
+        });
+
+        function toggleNewTagInput() {
+            var selectElement = document.getElementById('marcador_existente');
+            var newTagInputGroup = document.getElementById('novo_marcador_input_group');
+            var newTagInput = document.getElementById('novo_marcador_input');
+
+            if (selectElement.value === 'novo_marcador') {
+                newTagInputGroup.style.display = 'block'; // Mostra o campo
+                newTagInput.setAttribute('required', 'required'); // Torna o campo obrigatório
+            } else {
+                newTagInputGroup.style.display = 'none'; // Esconde o campo
+                newTagInput.removeAttribute('required'); // Remove a obrigatoriedade
+                newTagInput.value = ''; // Limpa o valor do campo oculto
+            }
+        }
+    </script>
+    </body>
 </html>

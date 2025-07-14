@@ -14,7 +14,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* Mantém o foco no conteúdo, evitando barras de rolagem indesejadas */
 }
 
 /* Pseudo-elemento para criar a sobreposição desvanecida */
@@ -41,9 +41,12 @@ body::before {
     justify-content: center;
     align-items: center;
     text-align: center;
+    /* Adicionado para garantir que o main-container não saia da tela em dispositivos menores */
+    box-sizing: border-box;
+    max-width: 95%; /* Para telas pequenas, o container não ultrapassa a largura da tela */
 }
 
-.main-container h2 { /* Estilo para o título da página de editar */
+.main-container h1 { /* CORRIGIDO: h2 para h1, como está no HTML */
     color: #333;
     margin-bottom: 30px;
     font-size: 2.2em;
@@ -69,9 +72,11 @@ form {
     font-size: 0.95em;
 }
 
+/* SELETORES E ESTILOS UNIFICADOS PARA INPUTS E SELECT */
 .input-group input[type="text"],
 .input-group input[type="date"],
-.input-group input[type="number"] {
+.input-group input[type="number"],
+.input-group select { /* <<< CORREÇÃO AQUI: '.input-group select' */
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ced4da;
@@ -79,9 +84,22 @@ form {
     font-size: 1em;
     box-sizing: border-box;
     transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #fff; /* Fundo branco para o select */
+    color: #495057; /* Cor do texto para o select */
+    /* Remove a estilização padrão do navegador para o select */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* Opcional: Para adicionar um ícone de seta customizado para o select */
+    /* background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236c757d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13%205.7L146.2%20224.2%2018.6%2075.4a17.6%2017.6%200%200%200-25.3%2023.4l130.4%20140.7c6.7%207.3%2016.8%207.3%2023.5%200L287%2092.8c6.9-7.2%206.9-18.9.1-25.3z%22%2F%3E%3C%2Fsvg%3E');
+       background-repeat: no-repeat;
+       background-position: right 15px center;
+       background-size: 10px; */
 }
 
-.input-group input:focus { /* Estilo de foco genérico para inputs */
+/* ESTILO DE FOCO UNIFICADO PARA INPUTS E SELECT */
+.input-group input:focus,
+.input-group select:focus { /* <<< CORREÇÃO AQUI: '.input-group select:focus' */
     border-color: #007bff;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     outline: none;
@@ -91,7 +109,7 @@ form {
 button[type="submit"] {
     width: 100%;
     padding: 14px;
-    background-color: #28a745; /* Cor azul do botão */
+    background-color: #28a745; /* Cor verde para o botão de salvar */
     color: white;
     border: none;
     border-radius: 8px;
@@ -99,13 +117,13 @@ button[type="submit"] {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); /* Sombra mais adequada para verde */
     margin-top: 15px;
     max-width: 320px;
 }
 
 button[type="submit"]:hover {
-    background-color: #218838; /* Cor azul mais escura no hover */
+    background-color: #218838; /* Cor verde mais escura no hover */
     transform: translateY(-2px);
 }
 
@@ -133,7 +151,7 @@ button[type="submit"]:hover {
         padding: 20px;
     }
 
-    .main-container h2 {
+    .main-container h1 { /* CORRIGIDO: h2 para h1 */
         font-size: 1.8em;
     }
 

@@ -2,9 +2,11 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notify - Home</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
     <header class="fixed-header">
@@ -28,45 +30,58 @@
         </div>
     </header>
 
-    <div class="container">
-        
-        <div class="button-section">
-            <a href="{{ url_for('cadastrar') }}">
-                <button>+ Cadastrar novo lembrete</button>
-            </a>
-        </div>
-
-        <div class="quadro">
-            <h2>Lembretes ativos:</h2>
-            {% if a_vencer %}
-                <ul>
-                {% for id_, nome, data in a_vencer %}
-                    <li>
-                        <span>{{ nome }} - vence em {{ data.strftime('%d/%m/%Y') }}</span>
-                        <a href="{{ url_for('editar', id=id_) }}">Editar</a>
-                    </li>
+    <div class="page-content-wrapper">
+        <aside class="sidebar">
+            <h3>Marcadores</h3>
+            <ul class="tag-list">
+                <li><a href="{{ url_for('home') }}" class="{% if not active_tag %}active{% endif %}">Todos os Lembretes</a></li>
+                {% for tag in marcadores %}
+                    <li><a href="{{ url_for('home', tag=tag) }}" class="{% if active_tag == tag %}active{% endif %}">{{ tag }}</a></li>
                 {% endfor %}
-                </ul>
-            {% else %}
-                <p>Nenhuma lembrete cadastrado.</p>
-            {% endif %}
-        </div>
+            </ul>
+        </aside>
 
-        <div class="quadro">
-            <h2>Lembretes expirados:</h2>
-            {% if vencidas %}
-                <ul>
-                {% for id_, nome, data in vencidas %}
-                    <li>
-                        <span>{{ nome }} - venceu em {{ data.strftime('%d/%m/%Y') }}</span>
-                        <a href="{{ url_for('editar', id=id_) }}">Editar</a>
-                    </li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p>Nenhum lembrete expirado.</p>
-            {% endif %}
-        </div>
+        <main class="main-content">
+            <div class="button-section">
+                <a href="{{ url_for('cadastrar') }}">
+                    <button class="button-primary">+ Cadastrar novo lembrete</button>
+                </a>
+            </div>
+
+            <div class="container">
+                <div class="quadro">
+                    <h2>Lembretes ativos:</h2>
+                    {% if a_vencer %}
+                        <ul>
+                        {% for id_, nome, vencimento, marcador in a_vencer %}
+                            <li>
+                                <span>{{ nome }} - vence em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
+                                <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>Nenhum lembrete ativo cadastrado{% if active_tag %} para o marcador "{{ active_tag }}"{% endif %}.</p>
+                    {% endif %}
+                </div>
+
+                <div class="quadro">
+                    <h2>Lembretes expirados:</h2>
+                    {% if vencidas %}
+                        <ul>
+                        {% for id_, nome, vencimento, marcador in vencidas %}
+                            <li>
+                                <span>{{ nome }} - venceu em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
+                                <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>Nenhum lembrete expirado cadastrado{% if active_tag %} para o marcador "{{ active_tag }}"{% endif %}.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
     </div>
 
     <footer>
@@ -81,6 +96,7 @@
         }
 
         window.onclick = function(event) {
+            // Fecha o dropdown se o clique for fora dele ou do botão de acionamento
             if (!event.target.closest('.username-wrapper') && !event.target.closest('.dropdown-menu')) {
                 var dropdowns = document.getElementsByClassName("dropdown-menu");
                 for (var i = 0; i < dropdowns.length; i++) {

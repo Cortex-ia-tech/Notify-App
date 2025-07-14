@@ -2,14 +2,13 @@
 
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 import psycopg2
-from psycopg2 import sql, errors # Importar errors para tratar exceções específicas
+from psycopg2 import sql, errors
 from datetime import datetime
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_mail import Mail, Message
-from werkzeug.security import generate_password_hash, check_password_hash # Importar para hashing de senha
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Importe APENAS as funções de rota do seu arquivo senha.py
-# O mock users_db_mock não é mais necessário aqui, pois usaremos o DB real.
 from senha import (
     forgot_password_route,
     reset_password_route,
@@ -20,9 +19,9 @@ from senha import (
 app = Flask(__name__)
 
 # --- Configurações da Aplicação ---
-app.config['SECRET_KEY'] = 'SUA_CHAVE_SECRETA_MUITO_LONGA_E_ALEATORIA_E_UNICA' # Mude para um valor forte
-app.config['SECURITY_PASSWORD_SALT'] = 'UM_SALT_MUITO_SEGURO_PARA_SENHAS_E_TOKENS' # Mude para um valor forte e diferente do SECRET_KEY
-app.config['SESSION_COOKIE_SECURE'] = True # Recomenda-se True em produção (HTTPS)
+app.config['SECRET_KEY'] = 'SUA_CHAVE_SECRETA_MUITO_LONGA_E_ALEATORIA_E_UNICA'
+app.config['SECURITY_PASSWORD_SALT'] = 'UM_SALT_MUITO_SEGURO_PARA_SENHAS_E_TOKENS'
+app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
@@ -30,16 +29,14 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'leonardomoreira@petroserra.com' # SUBSTITUA PELO SEU EMAIL REAL!
-app.config['MAIL_PASSWORD'] = 'obdf ilkz cpcj hbfn' # SUBSTITUA PELA SUA SENHA DE APP REAL!
-app.config['MAIL_DEFAULT_SENDER'] = 'leonardomoreira@petroserra.com' # SUBSTITUA PELO SEU EMAIL REAL!
+app.config['MAIL_USERNAME'] = 'leonardomoreira@petroserra.com'
+app.config['MAIL_PASSWORD'] = 'obdf ilkz cpcj hbfn'
+app.config['MAIL_DEFAULT_SENDER'] = 'leonardomoreira@petroserra.com'
 
 mail = Mail(app)
-app.mail = mail # Facilita o acesso ao objeto mail em outras funções
+app.mail = mail
 
 # Configurações de Conexão com Banco PostgreSQL (Supabase)
-# É uma boa prática armazenar isso em uma variável de ambiente ou arquivo de configuração
-# e não diretamente no código. Para fins de exemplo, mantenho aqui.
 app.config['DB_CONN_PARAMS'] = {
     "host": "aws-0-sa-east-1.pooler.supabase.com",
     "port": 6543,
@@ -68,31 +65,53 @@ def criar_tabela():
             id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
-            senha TEXT NOT NULL -- Armazenará o HASH da senha
+            senha TEXT NOT NULL
         )
     ''')
 
+    # Altere a tabela de licencas para adicionar a nova coluna 'marcador'
+    # Esta abordagem é para quando você NÃO USA Flask-Migrate (Alembic)
+    # Ela tenta adicionar a coluna, e se ela já existe (erro de "duplicate column"), ignora.
+    try:
+        c.execute('''
+            ALTER TABLE licencas
+            ADD COLUMN IF NOT EXISTS marcador TEXT NOT NULL DEFAULT 'Geral';
+        ''')
+        # A nova coluna deve ser NOT NULL, então definimos um DEFAULT para preencher
+        # os registros existentes e futuros que não especificarem um marcador.
+    except errors.DuplicateColumn:
+        # Se a coluna já existe, apenas ignore o erro
+        conn.rollback() # Garante que a transação seja desfeita para que outras operações possam continuar
+        print("Coluna 'marcador' já existe na tabela 'licencas'.")
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro ao adicionar coluna 'marcador': {e}")
+
+
     # Cria a tabela de licenças (garantindo que usuario_id esteja presente)
+    # Mantemos o IF NOT EXISTS aqui, mas o foco é o ALTER TABLE acima para adicionar a coluna
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
             id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             vencimento DATE NOT NULL,
             dias_antes INTEGER NOT NULL,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE -- Adicionado ON DELETE CASCADE
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+            marcador TEXT NOT NULL DEFAULT 'Geral' -- Garante que a coluna esteja aqui se a tabela for criada do zero
         )
     ''')
+
     conn.commit()
     conn.close()
 
 
 # --- Classe User para Flask-Login (UMA ÚNICA DEFINIÇÃO) ---
 class User(UserMixin):
-    def __init__(self, id_, nome, email, senha_hash): # Renomeado 'senha' para 'senha_hash' para clareza
+    def __init__(self, id_, nome, email, senha_hash):
         self.id = id_
         self.nome = nome
         self.email = email
-        self.senha_hash = senha_hash # Armazenamos o hash
+        self.senha_hash = senha_hash
 
     def get_id(self):
         return str(self.id)
@@ -102,24 +121,37 @@ class User(UserMixin):
 def load_user(user_id):
     conn = get_db_connection()
     c = conn.cursor()
-    # Certifique-se de que a ordem das colunas aqui corresponde à ordem do construtor User
     c.execute('SELECT id, nome, email, senha FROM usuarios WHERE id = %s', (int(user_id),))
     user_data = c.fetchone()
     conn.close()
     if user_data:
-        return User(*user_data) # Desempacota a tupla diretamente
+        return User(*user_data)
     return None
 
 # --- Rotas do Aplicativo Principal ---
 
 @app.route('/')
-@login_required # Protege a rota: exige login para acessar
+@login_required
 def home():
     usuario_id = current_user.id
+    
+    # Pega o parâmetro 'tag' da URL, se existir. Caso contrário, será None.
+    active_tag = request.args.get('tag') 
 
     conn = get_db_connection()
     c = conn.cursor()
-    c.execute('SELECT id, nome, vencimento FROM licencas WHERE usuario_id = %s', (usuario_id,))
+
+    # Base da consulta SQL
+    sql_query = 'SELECT id, nome, vencimento, marcador FROM licencas WHERE usuario_id = %s'
+    query_params = [usuario_id]
+
+    # Se um marcador (tag) foi selecionado, adicione a condição WHERE à consulta
+    if active_tag:
+        sql_query += ' AND marcador = %s'
+        query_params.append(active_tag)
+    
+    # Executa a consulta
+    c.execute(sql_query, tuple(query_params)) # Converter para tupla é importante para psycopg2
     licencas = c.fetchall()
     conn.close()
 
@@ -127,36 +159,119 @@ def home():
     a_vencer = []
     vencidas = []
 
-    for id_, nome, vencimento in licencas:
+    # Sempre coletar todos os marcadores únicos do usuário para exibir na barra lateral
+    # Para isso, é mais eficiente fazer uma query separada para os marcadores
+    # ou, como você já tem, iterar sobre a lista completa de licenças ANTES da filtragem.
+    # No entanto, se o número de licenças for grande, uma query separada é melhor.
+    # Por enquanto, vamos manter a iteração, mas lembre-se disso para performance.
+    
+    # Para obter todos os marcadores do usuário, precisamos de uma nova consulta (ou fazer uma pré-query).
+    # Uma forma mais eficiente para coletar marcadores para a sidebar:
+    conn_tags = get_db_connection()
+    c_tags = conn_tags.cursor()
+    c_tags.execute('SELECT DISTINCT marcador FROM licencas WHERE usuario_id = %s ORDER BY marcador', (usuario_id,))
+    marcadores_unicos_db = [row[0] for row in c_tags.fetchall()]
+    conn_tags.close()
+    
+    # Filtra as licenças APÓS buscá-las todas, se um marcador específico foi pedido.
+    # A consulta já faz a filtragem, mas se você precisar de todos os dados e depois filtrar em Python:
+    # Vamos manter a lógica de filtragem no SQL, que é mais eficiente.
+    
+    for id_, nome, vencimento, marcador in licencas: # licencas JÁ ESTÃO FILTRADAS PELO SQL
         data_venc = vencimento
         if data_venc >= hoje:
-            a_vencer.append((id_, nome, data_venc))
+            a_vencer.append((id_, nome, data_venc, marcador))
         else:
-            vencidas.append((id_, nome, data_venc))
+            vencidas.append((id_, nome, data_venc, marcador))
 
-    return render_template('home.html', a_vencer=a_vencer, vencidas=vencidas)
+    return render_template(
+        'home.html',
+        a_vencer=a_vencer,
+        vencidas=vencidas,
+        marcadores=marcadores_unicos_db, # Passa os marcadores distintos para a sidebar
+        active_tag=active_tag # Passa o marcador ativo para o template, para realçar o link
+    )
 
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
 @login_required
 def cadastrar():
+    usuario_id = current_user.id
+    conn = get_db_connection()
+    c = conn.cursor()
+
+    # >>> ADICIONE ESTE BLOCO PARA PEGAR TODOS OS MARCADORES EXISTENTES <<<
+    # Consulta para obter todos os marcadores únicos do usuário para o selectbox
+    c.execute('SELECT DISTINCT marcador FROM licencas WHERE usuario_id = %s ORDER BY marcador', (usuario_id,))
+    marcadores_existentes = [row[0] for row in c.fetchall()]
+    conn.close() # Feche a conexão após buscar os marcadores para o GET/render
+    # <<< FIM DO BLOCO ADICIONADO >>>
+
     if request.method == 'POST':
+        # Reabra a conexão para a operação POST
+        conn = get_db_connection()
+        c = conn.cursor()
+
         nome = request.form['nome']
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
-        usuario_id = current_user.id
+        
+        # Pega o marcador do campo select
+        marcador_selecionado = request.form.get('marcador_existente')
+        # Pega o novo marcador do campo de texto (se 'novo_marcador' for a opção selecionada)
+        novo_marcador = request.form.get('novo_marcador_input')
 
-        conn = get_db_connection()
-        c = conn.cursor()
-        c.execute('INSERT INTO licencas (nome, vencimento, dias_antes, usuario_id) VALUES (%s, %s, %s, %s)',
-                  (nome, vencimento, dias_antes, usuario_id))
-        conn.commit()
-        conn.close()
+        # Lógica para determinar qual marcador usar
+        if marcador_selecionado == 'novo_marcador' and novo_marcador:
+            marcador_final = novo_marcador.strip() # Remove espaços em branco extras
+            if not marcador_final: # Se o novo marcador estiver vazio após strip
+                flash('O nome do novo marcador não pode ser vazio.', 'danger')
+                conn.close()
+                # Retorna ao template com os dados e marcadores para manter o estado
+                return render_template(
+                    'cadastrar.html',
+                    nome_licenca=nome, # Para preencher o campo nome no erro
+                    data_vencimento=vencimento, # Para preencher o campo data no erro
+                    dias_antes=dias_antes, # Para preencher o campo dias_antes no erro
+                    marcador_selecionado=marcador_selecionado, # Manter a opção selecionada
+                    novo_marcador_input=novo_marcador, # Manter o texto do novo marcador
+                    marcadores_existentes=marcadores_existentes # Para popular o select
+                )
+        elif marcador_selecionado and marcador_selecionado != 'novo_marcador':
+            marcador_final = marcador_selecionado.strip()
+        else:
+            # Caso não tenha selecionado nem existente nem novo (ex: 'Selecione um marcador')
+            # Ou se a opção 'novo_marcador' foi selecionada mas o input ficou vazio.
+            flash('Por favor, selecione um marcador ou digite um novo.', 'danger')
+            conn.close()
+            # Retorna ao template com os dados e marcadores para manter o estado
+            return render_template(
+                'cadastrar.html',
+                nome_licenca=nome,
+                data_vencimento=vencimento,
+                dias_antes=dias_antes,
+                marcador_selecionado=marcador_selecionado,
+                novo_marcador_input=novo_marcador,
+                marcadores_existentes=marcadores_existentes
+            )
 
-        flash('Licença cadastrada com sucesso!', 'success')
-        return redirect(url_for('home'))
+        try:
+            # Inclua o 'marcador_final' na sua instrução INSERT
+            c.execute(
+                'INSERT INTO licencas (nome, vencimento, dias_antes, usuario_id, marcador) VALUES (%s, %s, %s, %s, %s)',
+                (nome, vencimento, dias_antes, usuario_id, marcador_final)
+            )
+            conn.commit()
+            flash('Lembrete cadastrado com sucesso!', 'success')
+            return redirect(url_for('home'))
+        except Exception as e:
+            conn.rollback()
+            flash(f'Erro ao cadastrar lembrete: {e}', 'danger')
+        finally:
+            conn.close()
 
-    return render_template('cadastrar.html')
+    # Para requisições GET (ou se o POST falhar e renderizar novamente o formulário)
+    return render_template('cadastrar.html', marcadores_existentes=marcadores_existentes)
 
 
 @app.route('/registrar', methods=['GET', 'POST'])
@@ -166,19 +281,18 @@ def registrar():
         email = request.form['email']
         senha = request.form['senha']
 
-        # CRÍTICO: HASH DA SENHA ANTES DE ARMAZENAR
         hashed_password = generate_password_hash(senha)
 
         conn = get_db_connection()
         c = conn.cursor()
         try:
             c.execute('INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s) RETURNING id',
-                      (nome, email, hashed_password)) # Armazena o hash
+                      (nome, email, hashed_password))
             new_user_id = c.fetchone()[0]
             conn.commit()
             flash('Usuário registrado com sucesso! Faça login para continuar.', 'success')
             return redirect(url_for('login'))
-        except errors.UniqueViolation: # Use errors.UniqueViolation
+        except errors.UniqueViolation:
             conn.rollback()
             flash('Este e-mail já está cadastrado.', 'danger')
         finally:
@@ -194,17 +308,15 @@ def login():
 
     if request.method == 'POST':
         email = request.form['email']
-        password = request.form['senha'] # Nome do campo no formulário
+        password = request.form['senha']
 
         conn = get_db_connection()
         c = conn.cursor()
-        # Busque a senha HASHED do banco de dados
         c.execute('SELECT id, nome, email, senha FROM usuarios WHERE email = %s', (email,))
         user_data = c.fetchone()
         conn.close()
 
         if user_data:
-            # CRÍTICO: VERIFIQUE A SENHA USANDO O HASH
             stored_password_hash = user_data[3]
             if check_password_hash(stored_password_hash, password):
                 user_obj = User(id_=user_data[0], nome=user_data[1], email=user_data[2], senha_hash=user_data[3])
@@ -227,7 +339,8 @@ def editar(id):
     conn = get_db_connection()
     c = conn.cursor()
 
-    c.execute('SELECT nome, vencimento, dias_antes FROM licencas WHERE id = %s AND usuario_id = %s', (id, usuario_id))
+    # Busque o marcador também para o formulário de edição
+    c.execute('SELECT nome, vencimento, dias_antes, marcador FROM licencas WHERE id = %s AND usuario_id = %s', (id, usuario_id))
     licenca = c.fetchone()
 
     if not licenca:
@@ -235,52 +348,87 @@ def editar(id):
         flash('Licença não encontrada ou você não tem permissão para editá-la.', 'danger')
         return redirect(url_for('home'))
 
+    # >>> ADICIONE ESTE BLOCO PARA PEGAR TODOS OS MARCADORES EXISTENTES <<<
+    # Consulta para obter todos os marcadores únicos do usuário
+    c.execute('SELECT DISTINCT marcador FROM licencas WHERE usuario_id = %s ORDER BY marcador', (usuario_id,))
+    marcadores_existentes = [row[0] for row in c.fetchall()]
+    conn.close() # Feche a conexão aqui, pois não será mais usada na lógica POST
+    # <<< FIM DO BLOCO ADICIONADO >>>
+
     if request.method == 'POST':
+        # Reabra a conexão para a operação POST
+        conn = get_db_connection()
+        c = conn.cursor()
+
         nome = request.form['nome']
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
+        
+        # Pega o marcador do campo select
+        marcador_selecionado = request.form.get('marcador_existente')
+        # Pega o novo marcador do campo de texto (se 'novo_marcador' for a opção selecionada)
+        novo_marcador = request.form.get('novo_marcador_input')
 
+        # Lógica para determinar qual marcador usar
+        if marcador_selecionado == 'novo_marcador' and novo_marcador:
+            marcador_final = novo_marcador.strip() # Remove espaços em branco extras
+        elif marcador_selecionado and marcador_selecionado != 'novo_marcador':
+            marcador_final = marcador_selecionado.strip()
+        else:
+            # Caso não tenha selecionado nem existente nem novo, use 'Geral' ou o marcador atual
+            marcador_final = licenca[3] # Mantém o marcador atual se nada for especificado
+            if not marcador_final: # Se o marcador atual for nulo por algum motivo
+                marcador_final = 'Geral'
+
+
+        # Inclua o 'marcador_final' na sua instrução UPDATE
         c.execute('''
             UPDATE licencas
-            SET nome = %s, vencimento = %s, dias_antes = %s
+            SET nome = %s, vencimento = %s, dias_antes = %s, marcador = %s
             WHERE id = %s AND usuario_id = %s
-        ''', (nome, vencimento, dias_antes, id, usuario_id))
+        ''', (nome, vencimento, dias_antes, marcador_final, id, usuario_id))
         conn.commit()
         conn.close()
         flash('Licença atualizada com sucesso!', 'success')
         return redirect(url_for('home'))
 
-    conn.close()
-    return render_template('editar.html', id=id, nome=licenca[0], vencimento=licenca[1], dias_antes=licenca[2])
+    # Se for GET, passe os dados existentes e todos os marcadores para o template
+    return render_template(
+        'editar.html',
+        id=id,
+        nome=licenca[0],
+        vencimento=licenca[1],
+        dias_antes=licenca[2],
+        marcador_atual=licenca[3], # Renomeado para evitar conflito com 'marcador' da lista
+        marcadores_existentes=marcadores_existentes # Lista de todos os marcadores
+    )
 
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    session.clear() # Limpa a sessão
+    session.clear()
     flash('Você foi desconectado.', 'info')
     return redirect(url_for('login'))
 
 
-@app.route('/suporte', methods=['GET', 'POST']) # Adicione 'POST' aqui
+@app.route('/suporte', methods=['GET', 'POST'])
 @login_required
 def suporte():
     if request.method == 'POST':
         assunto = request.form['assunto']
         mensagem_usuario = request.form['mensagem']
-        
-        # Obtenha o email do usuário logado para referência
-        remetente_email = current_user.email
-        remetente_nome = current_user.nome # Se você quiser incluir o nome também
 
-        # Email de destino (o seu, como desenvolvedor)
+        remetente_email = current_user.email
+        remetente_nome = current_user.nome
+
         destinatario_suporte = 'leonardomoreira@petroserra.com'
-        
+
         try:
             msg = Message(
                 subject=f"Suporte Notify - {assunto} (de {remetente_nome} - {remetente_email})",
-                sender=app.config['MAIL_DEFAULT_SENDER'], # Seu email de envio
+                sender=app.config['MAIL_DEFAULT_SENDER'],
                 recipients=[destinatario_suporte]
             )
             msg.body = f"""
@@ -296,16 +444,14 @@ Enviado via formulário de suporte do Notify.
             """
             app.mail.send(msg)
             flash('Sua demanda de suporte foi enviada com sucesso! Em breve entraremos em contato.', 'success')
-            return redirect(url_for('home')) # Ou para uma página de confirmação
+            return redirect(url_for('home'))
         except Exception as e:
             app.logger.error(f"Erro ao enviar demanda de suporte de {remetente_email}: {e}")
             flash('Ocorreu um erro ao enviar sua demanda de suporte. Por favor, tente novamente mais tarde.', 'danger')
-            # Permite que o formulário seja renderizado novamente com os dados, se desejar
             return render_template('suporte.html',
                                    assunto_preenchido=assunto,
                                    mensagem_preenchida=mensagem_usuario)
 
-    # Para requisições GET
     return render_template('suporte.html')
 
 # --- Registro das Rotas de Senha do 'senha.py' ---

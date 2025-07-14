@@ -1,41 +1,37 @@
-
-/* Estilos Globais e Reset */
+/* Estilos Gerais e Reset Básico */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding-top: 70px;
-    background-color: #f8f9fa;
-    color: #343a40;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
     line-height: 1.6;
-    /* Novas adições para remover barras de rolagem desnecessárias */
-    overflow-x: hidden; /* Garante que não haverá barra de rolagem horizontal */
-    overflow-y: auto; /* Garante que não haverá barra de rolagem vertical */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-/* --- Barra de Navegação Fixa (Header) --- */
+/* Header fixo no topo */
 .fixed-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
     background-color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 10px 30px;
+    padding: 15px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
     z-index: 1000;
+    box-sizing: border-box; /* Garante que padding não adicione largura extra */
 }
 
 .header-left .logo {
-    font-size: 30px;
+    font-size: 1.8em;
     font-weight: 700;
-    color: #28a745;
+    color: #28a745; /* Verde Notify */
+    text-decoration: none;
     transition: color 0.3s ease;
 }
 
@@ -43,245 +39,439 @@ a {
     color: #218838;
 }
 
+.header-left .logo sup {
+    font-size: 0.6em;
+    vertical-align: super;
+    margin-left: 2px;
+}
+
 .header-right {
-    position: relative;
     display: flex;
     align-items: center;
-    margin-right: 50px; /* Ajuste para mover o grupo de login/usuário um pouco para a esquerda */
-    gap: 15px;
+    gap: 15px; /* Espaçamento entre os itens do lado direito */
 }
 
-.header-left sup {
-    font-size: 0.4em; /* Ajuste este valor para controlar o tamanho */
-    vertical-align: super; /* Garante que ele fique como sobrescrito */
-    margin-left: 2px; /* Pequeno espaçamento à esquerda do símbolo */
+.button-login,
+.button-register {
+    padding: 10px 20px;
+    font-size: 0.95em;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-/* Novo estilo para a área clicável do usuário */
-.header-right .username-wrapper {
+.button-login {
+    background-color: #007bff; /* Azul */
+    color: white;
+    border: 1px solid #007bff;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+.button-login:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.button-register {
+    background-color: #6c757d; /* Cinza */
+    color: white;
+    border: 1px solid #6c757d;
+    box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+}
+
+.button-register:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Estilos para o dropdown do usuário */
+.username-wrapper {
     display: flex;
     align-items: center;
     cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 20px;
-    transition: background-color 0.3s;
+    position: relative; /* Para o posicionamento do dropdown */
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
 }
 
-.header-right .username-wrapper:hover {
-    background-color: #f0f2f5;
+.username-wrapper:hover {
+    background-color: #e9ecef;
 }
 
-.header-right .username {
-    font-size: 15px;
-    color: #555;
-    white-space: nowrap;
+.username {
+    font-weight: 600;
     margin-right: 8px;
+    color: #333;
 }
 
-.header-right .icon-button {
-    background: none;
-    border: none;
-    font-size: 22px;
-    color: #6c757d;
-    transition: color 0.3s;
+.icon-button {
+    font-size: 1.4em;
+    color: #007bff; /* Azul */
 }
 
-.header-right .icon-button:hover {
-    color: #343a40;
-}
-
-/* Dropdown Menu */
 .dropdown-menu {
+    display: none; /* Escondido por padrão */
     position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    background-color: #ffffff;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(15px);
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s;
+    background-color: #f9f9f9;
     min-width: 180px;
-    z-index: 1001;
-    padding: 5px 0;
-}
-
-.dropdown-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    top: 100%; /* Posiciona abaixo do wrapper */
+    right: 0;
+    border-radius: 8px;
+    overflow: hidden; /* Garante que o border-radius funcione nas bordas dos links */
+    margin-top: 5px; /* Espaçamento entre o wrapper e o dropdown */
 }
 
 .dropdown-menu a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
     display: block;
-    padding: 12px 20px;
-    color: #343a40;
-    font-size: 15px;
-    transition: background-color 0.2s, color 0.2s;
+    text-align: left;
+    transition: background-color 0.2s ease;
 }
 
 .dropdown-menu a:hover {
+    background-color: #ddd;
+}
+
+.dropdown-menu .logout {
+    color: #dc3545; /* Cor vermelha para sair */
+}
+
+.dropdown-menu .logout:hover {
+    background-color: #f8d7da; /* Fundo vermelho claro no hover */
+    color: #721c24; /* Texto vermelho mais escuro */
+}
+
+.dropdown-menu.show {
+    display: block; /* Mostra quando a classe 'show' é adicionada via JS */
+}
+
+/* Layout principal com sidebar e conteúdo */
+.page-content-wrapper {
+    display: flex;
+    flex: 1; /* Ocupa o espaço restante verticalmente */
+    padding-top: 80px; /* Para dar espaço ao fixed-header */
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre elementos da sidebar */
+}
+
+.sidebar h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.tag-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tag-list li {
+    margin-bottom: 8px;
+}
+
+.tag-list a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #555;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tag-list a:hover {
     background-color: #e9ecef;
     color: #007bff;
 }
 
-.dropdown-menu a.logout {
-    color: #dc3545;
-}
-
-.dropdown-menu a.logout:hover {
-    background-color: #ffebe9;
-    color: #c82333;
-}
-
-/* Estilos para botões de Login/Registrar se o usuário NÃO estiver logado */
-.header-right .button-login,
-.header-right .button-register {
-    display: inline-block;
-    padding: 8px 15px;
-    border-radius: 5px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.header-right .button-login {
-    background-color: #007bff;
+.tag-list a.active {
+    background-color: #007bff; /* Azul */
     color: white;
-    border: 1px solid #007bff;
-}
-
-.header-right .button-login:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-}
-
-.header-right .button-register {
-    background-color: transparent;
-    color: #007bff;
-    border: 1px solid #007bff;
-    margin-left: 10px;
-}
-
-.header-right .button-register:hover {
-    background-color: #e6f2ff;
-    color: #0056b3;
-}
-
-/* --- Conteúdo Principal --- */
-.container {
-    max-width: 960px;
-    margin: 20px auto;
-    padding: 0 20px;
-    box-sizing: border-box;
-}
-
-h1 {
-    color: #2c3e50;
-    text-align: center;
-    margin-top: 40px;
-    margin-bottom: 20px;
-    font-size: 2.5em;
     font-weight: 600;
 }
 
-.description-text {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #555;
-    font-size: 1.1em;
+.tag-list a.active:hover {
+    background-color: #0056b3;
 }
 
+/* Área de conteúdo principal */
+.main-content {
+    flex-grow: 1; /* Ocupa o restante do espaço horizontalmente */
+    padding: 30px; /* Adicionado padding para espaçamento interno */
+    display: flex; /* Torna o main-content um flex container */
+    flex-direction: column; /* Organiza os itens em coluna */
+    align-items: flex-start; /* Alinha os itens ao início (esquerda) */
+    gap: 20px; /* Espaço entre os elementos filhos do main-content (botão, container, etc.) */
+}
+
+/* Estilo para o botão de cadastrar novo lembrete */
 .button-section {
-    text-align: center;
-    margin-bottom: 50px;
+    width: 100%; /* Ocupa a largura total para alinhamento de texto */
+    text-align: left; /* Alinha o botão à esquerda */
+    /* margin-bottom foi movido para o gap do main-content */
 }
 
-.button-section button {
-    padding: 14px 10px;
+.button-primary {
+    display: inline-block;
+    padding: 14px 25px;
     font-size: 17px;
-    background-color: #28a745;
+    background-color: #007bff; /* Cor azul primária */
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    text-decoration: none;
+    font-weight: 600;
 }
 
-.button-section button:hover {
-    background-color: #218838;
+.button-primary:hover {
+    background-color: #0056b3; /* Cor azul mais escura no hover */
     transform: translateY(-2px);
 }
 
-/* --- Quadros de Licenças --- */
+/* Container para os quadros de lembretes */
+.container {
+    width: 100%; /* Garante que o container ocupe toda a largura disponível */
+    max-width: 1000px; /* Define a largura máxima dos quadros */
+     /* Centraliza o container na área disponível */
+    display: flex;
+    flex-direction: column; /* Organiza os quadros em coluna */
+    gap: 20px; /* Espaço entre os quadros */
+}
+
 .quadro {
     background-color: #ffffff;
+    padding: 25px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    padding: 30px;
-    margin-bottom: 30px;
-    width: 80%;
-    margin-left: auto; /* Centraliza o quadro */
-    margin-right: auto; /* Centraliza o quadro */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
 }
 
 .quadro h2 {
-    color: #34495e;
+    color: #333;
     margin-top: 0;
     margin-bottom: 20px;
-    border-bottom: 2px solid #e9ecef;
-    padding-bottom: 15px;
     font-size: 1.6em;
-    font-weight: 500;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
 }
 
 .quadro ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 .quadro li {
-    padding: 12px 0;
-    border-bottom: 1px dashed #e0e0e0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1.05em;
+    padding: 10px 0;
+    border-bottom: 1px dotted #e0e0e0;
 }
 
 .quadro li:last-child {
     border-bottom: none;
 }
 
+.quadro li span {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
 .quadro li a {
-    color: #dda200;
-    font-size: 0.95em;
-    transition: color 0.2s;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .quadro li a:hover {
-    color: #b34800;
+    color: #0056b3;
     text-decoration: underline;
 }
 
-.quadro p {
-    text-align: center;
-    color: #777;
-    font-style: italic;
-    padding: 10px 0;
+.tag-label {
+    background-color: #e0e0e0; /* Cor de fundo para a tag */
+    color: #555;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 500;
+    margin-left: 8px;
 }
 
-/* --- Rodapé --- */
-footer {
-    background-color: #e9ecef;
-    padding: 25px;
-    margin-top: 60px;
-    color: #6c757d;
-    font-size: 13px;
+/* Mensagens de feedback (flash messages) */
+.flash-message {
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-weight: 600;
     text-align: center;
-    border-top: 1px solid #dee2e6;
+}
+
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Rodapé */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    margin-top: auto; /* Empurra o rodapé para baixo */
+    color: #555;
+    font-size: 0.9em;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .page-content-wrapper {
+        flex-direction: column;
+        padding-top: 70px; /* Ajusta para cabeçalho menor */
+    }
+
+    .sidebar {
+        width: 100%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding-bottom: 10px;
+        flex-direction: row; /* Sidebar como linha em telas menores */
+        justify-content: center;
+        flex-wrap: wrap; /* Permite que os itens da sidebar quebrem linha */
+        gap: 10px;
+    }
+
+    .sidebar h3 {
+        width: 100%; /* Título ocupa largura total */
+        text-align: center;
+        border-bottom: none; /* Remove a linha de baixo */
+        padding-bottom: 0;
+        margin-bottom: 10px;
+    }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .tag-list li {
+        margin-bottom: 0;
+    }
+
+    .tag-list a {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .main-content {
+        padding: 20px; /* Reduz padding para telas menores */
+        align-items: center; /* Centraliza o conteúdo principal */
+    }
+
+    .button-section {
+        text-align: center; /* Centraliza o botão em telas menores */
+    }
+
+    .button-primary {
+        width: auto; /* Permite que o botão se ajuste ao conteúdo */
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+
+    .container {
+        /* Em telas menores, o container deve ocupar 100% da largura disponível */
+        max-width: 100%; /* Sobrescreve o 500px para responsividade */
+        padding: 0 10px; /* Adiciona um pequeno padding nas laterais */
+    }
+}
+
+@media (max-width: 768px) {
+    .fixed-header {
+        padding: 10px 20px;
+    }
+
+    .header-left .logo {
+        font-size: 1.5em;
+    }
+
+    .header-right {
+        gap: 10px;
+    }
+
+    .username-wrapper {
+        padding: 5px 8px;
+    }
+
+    .username {
+        font-size: 0.9em;
+    }
+
+    .icon-button {
+        font-size: 1.2em;
+    }
+
+    .button-login,
+    .button-register {
+        padding: 8px 15px;
+        font-size: 0.85em;
+    }
+
+    .quadro {
+        padding: 20px;
+    }
+
+    .quadro h2 {
+        font-size: 1.4em;
+    }
+
+    .quadro li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        text-align: left;
+    }
+
+    .quadro li span {
+        margin-right: 0;
+    }
+
+    .quadro li a {
+        align-self: flex-end; /* Move o link "Editar" para a direita */
+    }
+
+    .container {
+        max-width: 100%; /* Garante que se adapte totalmente */
+        padding: 0; /* Remove padding lateral adicional se já tiver no main-content */
+    }
 }
