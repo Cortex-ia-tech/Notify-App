@@ -62,17 +62,17 @@ for id_, nome, vencimento, dias_antes, email_usuario in licencas:
     mensagem = MIMEMultipart()
     mensagem["From"] = remetente
     mensagem["To"] = email_usuario
-    mensagem["Subject"] = f"⚠️ Lembrete: {nome} vence em {vencimento.strftime('%d/%m/%Y')}"
+    mensagem["Subject"] = f"📌 Lembrete: {nome} vence em {vencimento.strftime('%d/%m/%Y')} 📆"
     corpo = f"""
 Olá,
 
-A licença "{nome}" está próxima do vencimento (vence em {vencimento.strftime('%d/%m/%Y')}).
+Este é um lembrete para "{nome}", que está próximo do vencimento (vence em {vencimento.strftime('%d/%m/%Y')}).
 Você optou por ser avisado(a) com {dias_antes} dias de antecedência.
 
-Acesse o SkyNotify para atualizar essa licença.
+Acesse o Notify para atualizar essa licença.
 
-Att,  
-SkyNotify | Uma criação SkyNet Business Intelligence®
+--  
+Notify | Uma criação Cortex-ia Business Intelligence®
 """
     mensagem.attach(MIMEText(corpo, "plain"))
 
