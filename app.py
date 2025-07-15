@@ -1,5 +1,11 @@
 # app.py
-
+from persist.cache import ler_lembretes_cache
+from persist.cache import ler_lembretes_cache, editar_lembrete_cache
+from flask import jsonify
+from persist.cache import sincronizar_cache_com_postgre
+from persist.cache import inserir_lembrete_cache
+from persist.cache import inicializar_cache_sqlite
+from random import randint
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 import psycopg2
 from psycopg2 import sql, errors
@@ -134,77 +140,45 @@ def load_user(user_id):
 @login_required
 def home():
     usuario_id = current_user.id
-    
-    # Pega o parâmetro 'tag' da URL, se existir. Caso contrário, será None.
-    active_tag = request.args.get('tag') 
-
-    conn = get_db_connection()
-    c = conn.cursor()
-
-    # Base da consulta SQL
-    sql_query = 'SELECT id, nome, vencimento, marcador FROM licencas WHERE usuario_id = %s'
-    query_params = [usuario_id]
-
-    # Se um marcador (tag) foi selecionado, adicione a condição WHERE à consulta
-    if active_tag:
-        sql_query += ' AND marcador = %s'
-        query_params.append(active_tag)
-    
-    # Executa a consulta
-    c.execute(sql_query, tuple(query_params)) # Converter para tupla é importante para psycopg2
-    licencas = c.fetchall()
-    conn.close()
-
+    active_tag = request.args.get('tag')
     hoje = datetime.now().date()
+
+    # ⚡️ Lê os lembretes do cache local, não do Postgre
+    lembretes = ler_lembretes_cache(usuario_id)
+
     a_vencer = []
     vencidas = []
+    marcadores_unicos = set()
 
-    # Sempre coletar todos os marcadores únicos do usuário para exibir na barra lateral
-    # Para isso, é mais eficiente fazer uma query separada para os marcadores
-    # ou, como você já tem, iterar sobre a lista completa de licenças ANTES da filtragem.
-    # No entanto, se o número de licenças for grande, uma query separada é melhor.
-    # Por enquanto, vamos manter a iteração, mas lembre-se disso para performance.
-    
-    # Para obter todos os marcadores do usuário, precisamos de uma nova consulta (ou fazer uma pré-query).
-    # Uma forma mais eficiente para coletar marcadores para a sidebar:
-    conn_tags = get_db_connection()
-    c_tags = conn_tags.cursor()
-    c_tags.execute('SELECT DISTINCT marcador FROM licencas WHERE usuario_id = %s ORDER BY marcador', (usuario_id,))
-    marcadores_unicos_db = [row[0] for row in c_tags.fetchall()]
-    conn_tags.close()
-    
-    # Filtra as licenças APÓS buscá-las todas, se um marcador específico foi pedido.
-    # A consulta já faz a filtragem, mas se você precisar de todos os dados e depois filtrar em Python:
-    # Vamos manter a lógica de filtragem no SQL, que é mais eficiente.
-    
-    for id_, nome, vencimento, marcador in licencas: # licencas JÁ ESTÃO FILTRADAS PELO SQL
-        data_venc = vencimento
-        if data_venc >= hoje:
-            a_vencer.append((id_, nome, data_venc, marcador))
+    for id_, nome, vencimento_str, dias_antes, marcador in lembretes:
+        vencimento = datetime.strptime(vencimento_str, '%Y-%m-%d').date()
+        if active_tag and marcador != active_tag:
+            continue
+
+        marcadores_unicos.add(marcador)
+
+        if vencimento >= hoje:
+            a_vencer.append((id_, nome, vencimento, marcador))
         else:
-            vencidas.append((id_, nome, data_venc, marcador))
+            vencidas.append((id_, nome, vencimento, marcador))
 
     return render_template(
         'home.html',
         a_vencer=a_vencer,
         vencidas=vencidas,
-        marcadores=marcadores_unicos_db, # Passa os marcadores distintos para a sidebar
-        active_tag=active_tag # Passa o marcador ativo para o template, para realçar o link
+        marcadores=sorted(marcadores_unicos),
+        active_tag=active_tag
     )
-
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
 @login_required
 def cadastrar():
     usuario_id = current_user.id
-    conn = get_db_connection()
-    c = conn.cursor()
+    #conn = get_db_connection()
+    #c = conn.cursor()
 
-    # >>> ADICIONE ESTE BLOCO PARA PEGAR TODOS OS MARCADORES EXISTENTES <<<
-    # Consulta para obter todos os marcadores únicos do usuário para o selectbox
-    c.execute('SELECT DISTINCT marcador FROM licencas WHERE usuario_id = %s ORDER BY marcador', (usuario_id,))
-    marcadores_existentes = [row[0] for row in c.fetchall()]
-    conn.close() # Feche a conexão após buscar os marcadores para o GET/render
+    lembretes = ler_lembretes_cache(usuario_id)
+    marcadores_existentes = sorted(set(l[4] for l in lembretes))
     # <<< FIM DO BLOCO ADICIONADO >>>
 
     if request.method == 'POST':
@@ -256,17 +230,17 @@ def cadastrar():
             )
 
         try:
-            # Inclua o 'marcador_final' na sua instrução INSERT
-            c.execute(
-                'INSERT INTO licencas (nome, vencimento, dias_antes, usuario_id, marcador) VALUES (%s, %s, %s, %s, %s)',
-                (nome, vencimento, dias_antes, usuario_id, marcador_final)
-            )
-            conn.commit()
-            flash('Lembrete cadastrado com sucesso!', 'success')
+    # Criamos um ID temporário negativo para garantir unicidade até sincronizar com o Postgre
+            id_temp = -randint(100000, 999999)
+
+            lembrete = (id_temp, nome, vencimento, int(dias_antes), marcador_final)
+            inserir_lembrete_cache(usuario_id, lembrete)
+
+            flash('Lembrete salvo localmente! Será sincronizado mais tarde.', 'success')
             return redirect(url_for('home'))
         except Exception as e:
-            conn.rollback()
-            flash(f'Erro ao cadastrar lembrete: {e}', 'danger')
+            flash(f'Erro ao salvar lembrete localmente: {e}', 'danger')
+            
         finally:
             conn.close()
 
@@ -321,6 +295,14 @@ def login():
             if check_password_hash(stored_password_hash, password):
                 user_obj = User(id_=user_data[0], nome=user_data[1], email=user_data[2], senha_hash=user_data[3])
                 login_user(user_obj)
+                conn = get_db_connection()
+                c = conn.cursor()
+                c.execute('SELECT id, nome, vencimento, dias_antes, marcador FROM licencas WHERE usuario_id = %s', (user_obj.id,))
+                lembretes = c.fetchall()
+                conn.close()
+
+                inicializar_cache_sqlite(user_obj.id, lembretes)
+                
                 next_page = request.args.get('next')
                 flash(f'Olá, {user_obj.nome}! Bem-vindo(a) de volta.', 'success')
                 return redirect(next_page or url_for('home'))
@@ -336,81 +318,71 @@ def login():
 @login_required
 def editar(id):
     usuario_id = current_user.id
-    conn = get_db_connection()
-    c = conn.cursor()
+    lembretes = ler_lembretes_cache(usuario_id)
 
-    # Busque o marcador também para o formulário de edição
-    c.execute('SELECT nome, vencimento, dias_antes, marcador FROM licencas WHERE id = %s AND usuario_id = %s', (id, usuario_id))
-    licenca = c.fetchone()
-
-    if not licenca:
-        conn.close()
-        flash('Licença não encontrada ou você não tem permissão para editá-la.', 'danger')
+    # Busca o lembrete pelo ID no cache local
+    lembrete = next((l for l in lembretes if l[0] == id), None)
+    if not lembrete:
+        flash('Lembrete não encontrado ou você não tem permissão para editá-lo.', 'danger')
         return redirect(url_for('home'))
 
-    # >>> ADICIONE ESTE BLOCO PARA PEGAR TODOS OS MARCADORES EXISTENTES <<<
-    # Consulta para obter todos os marcadores únicos do usuário
-    c.execute('SELECT DISTINCT marcador FROM licencas WHERE usuario_id = %s ORDER BY marcador', (usuario_id,))
-    marcadores_existentes = [row[0] for row in c.fetchall()]
-    conn.close() # Feche a conexão aqui, pois não será mais usada na lógica POST
-    # <<< FIM DO BLOCO ADICIONADO >>>
+    nome_atual, vencimento_atual, dias_antes_atual, marcador_atual = lembrete[1:]
+    vencimento_atual = datetime.strptime(vencimento_atual, '%Y-%m-%d')
+
+    # Coletar todos os marcadores do cache
+    marcadores_existentes = sorted(set(l[4] for l in lembretes))
 
     if request.method == 'POST':
-        # Reabra a conexão para a operação POST
-        conn = get_db_connection()
-        c = conn.cursor()
-
         nome = request.form['nome']
         vencimento = request.form['vencimento']
         dias_antes = request.form['dias_antes']
-        
-        # Pega o marcador do campo select
+
         marcador_selecionado = request.form.get('marcador_existente')
-        # Pega o novo marcador do campo de texto (se 'novo_marcador' for a opção selecionada)
         novo_marcador = request.form.get('novo_marcador_input')
 
-        # Lógica para determinar qual marcador usar
+        # Lógica para determinar o marcador final
         if marcador_selecionado == 'novo_marcador' and novo_marcador:
-            marcador_final = novo_marcador.strip() # Remove espaços em branco extras
+            marcador_final = novo_marcador.strip()
         elif marcador_selecionado and marcador_selecionado != 'novo_marcador':
             marcador_final = marcador_selecionado.strip()
         else:
-            # Caso não tenha selecionado nem existente nem novo, use 'Geral' ou o marcador atual
-            marcador_final = licenca[3] # Mantém o marcador atual se nada for especificado
-            if not marcador_final: # Se o marcador atual for nulo por algum motivo
-                marcador_final = 'Geral'
+            marcador_final = marcador_atual or 'Geral'
 
+        novos_dados = (nome, vencimento, int(dias_antes), marcador_final)
 
-        # Inclua o 'marcador_final' na sua instrução UPDATE
-        c.execute('''
-            UPDATE licencas
-            SET nome = %s, vencimento = %s, dias_antes = %s, marcador = %s
-            WHERE id = %s AND usuario_id = %s
-        ''', (nome, vencimento, dias_antes, marcador_final, id, usuario_id))
-        conn.commit()
-        conn.close()
-        flash('Licença atualizada com sucesso!', 'success')
-        return redirect(url_for('home'))
+        try:
+            editar_lembrete_cache(usuario_id, id, novos_dados)
+            flash('Lembrete atualizado localmente! Será sincronizado mais tarde.', 'success')
+            return redirect(url_for('home'))
+        except Exception as e:
+            flash(f'Erro ao atualizar lembrete localmente: {e}', 'danger')
 
-    # Se for GET, passe os dados existentes e todos os marcadores para o template
     return render_template(
         'editar.html',
         id=id,
-        nome=licenca[0],
-        vencimento=licenca[1],
-        dias_antes=licenca[2],
-        marcador_atual=licenca[3], # Renomeado para evitar conflito com 'marcador' da lista
-        marcadores_existentes=marcadores_existentes # Lista de todos os marcadores
+        nome=nome_atual,
+        vencimento=vencimento_atual,
+        dias_antes=dias_antes_atual,
+        marcador_atual=marcador_atual,
+        marcadores_existentes=marcadores_existentes
     )
 
 
 @app.route('/logout')
 @login_required
 def logout():
+    try:
+        # ⚡️ Sincroniza com Postgre antes de sair
+        sincronizar_cache_com_postgre(current_user.id, app.config['DB_CONN_PARAMS'])
+        flash('Dados sincronizados com sucesso.', 'success')
+    except Exception as e:
+        flash(f'Erro ao sincronizar os dados com o servidor: {e}', 'danger')
+
     logout_user()
     session.clear()
     flash('Você foi desconectado.', 'info')
     return redirect(url_for('login'))
+
 
 
 @app.route('/suporte', methods=['GET', 'POST'])
@@ -458,6 +430,16 @@ Enviado via formulário de suporte do Notify.
 app.add_url_rule('/forgot_password', 'forgot_password', forgot_password_route, methods=['GET', 'POST'])
 app.add_url_rule('/reset_password/<token>', 'reset_password', reset_password_route, methods=['GET', 'POST'])
 app.add_url_rule('/change_password', 'change_password', change_password_route, methods=['GET', 'POST'])
+
+
+@app.route('/sincronizar', methods=['POST'])
+@login_required
+def sincronizar():
+    try:
+        sincronizar_cache_com_postgre(current_user.id, app.config['DB_CONN_PARAMS'])
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
 
 # Garante que as tabelas sejam criadas ao iniciar o aplicativo

@@ -108,5 +108,27 @@
             }
         }
     </script>
+
+    <script>
+        function sincronizarPeriodicamente() {
+            fetch('/sincronizar', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        console.log('Sincronização automática concluída');
+                    } else {
+                        console.warn('Erro na sincronização:', data.mensagem);
+                    }
+                })
+                .catch(err => {
+                    console.error('Falha ao tentar sincronizar:', err);
+                });
+        }
+
+        // Chama a cada 5 minutos
+        setInterval(sincronizarPeriodicamente, 5 * 60 * 1000);
+        </script>
+
+
 </body>
 </html>
