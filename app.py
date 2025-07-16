@@ -133,9 +133,14 @@ def load_user(user_id):
 # --- Rotas do Aplicativo Principal ---
 
 @app.route('/')
+    
 #@login_required
 def home():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
     usuario_id = current_user.id
+
     active_tag = request.args.get('tag')
     hoje = datetime.now().date()
 
@@ -168,7 +173,13 @@ def home():
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
 #@login_required
+
+
 def cadastrar():
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
     usuario_id = current_user.id
     #conn = get_db_connection()
     #c = conn.cursor()
@@ -246,6 +257,12 @@ def cadastrar():
 
 @app.route('/registrar', methods=['GET', 'POST'])
 def registrar():
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
+    usuario_id = current_user.id
+
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
@@ -273,8 +290,6 @@ def registrar():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
 
     if request.method == 'POST':
         email = request.form['email']
@@ -313,6 +328,10 @@ def login():
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
 #@login_required
 def editar(id):
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
     usuario_id = current_user.id
     lembretes = ler_lembretes_cache(usuario_id)
 
@@ -367,6 +386,12 @@ def editar(id):
 @app.route('/logout')
 #@login_required
 def logout():
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    
+    usuario_id = current_user.id
+
     try:
         # ⚡️ Sincroniza com Postgre antes de sair
         sincronizar_cache_com_postgre(current_user.id, app.config['DB_CONN_PARAMS'])
