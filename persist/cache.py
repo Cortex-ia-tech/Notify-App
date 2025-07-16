@@ -86,11 +86,22 @@ def sincronizar_cache_com_postgre(usuario_id, db_conn_params):
     try:
         pg_conn = psycopg2.connect(**db_conn_params)
         pg_cur = pg_conn.cursor()
+
         for id_, nome, vencimento, dias_antes, marcador in alterados:
-            pg_cur.execute('''
-                UPDATE licencas SET nome = %s, vencimento = %s, dias_antes = %s, marcador = %s
-                WHERE id = %s AND usuario_id = %s
-            ''', (nome, vencimento, dias_antes, marcador, id_, usuario_id))
+            if id_ > 0:
+                # Atualizar lembrete existente
+                pg_cur.execute('''
+                    UPDATE licencas
+                    SET nome = %s, vencimento = %s, dias_antes = %s, marcador = %s
+                    WHERE id = %s AND usuario_id = %s
+                ''', (nome, vencimento, dias_antes, marcador, id_, usuario_id))
+            else:
+                # Inserir novo lembrete
+                pg_cur.execute('''
+                    INSERT INTO licencas (nome, vencimento, dias_antes, usuario_id, marcador)
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', (nome, vencimento, dias_antes, usuario_id, marcador))
+
         pg_conn.commit()
         pg_conn.close()
         sqlite_conn.close()
