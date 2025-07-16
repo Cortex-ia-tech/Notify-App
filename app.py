@@ -1,10 +1,6 @@
 # app.py
-from persist.cache import ler_lembretes_cache
-from persist.cache import ler_lembretes_cache, editar_lembrete_cache
+from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite
 from flask import jsonify
-from persist.cache import sincronizar_cache_com_postgre
-from persist.cache import inserir_lembrete_cache
-from persist.cache import inicializar_cache_sqlite
 from random import randint
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 import psycopg2
@@ -137,7 +133,7 @@ def load_user(user_id):
 # --- Rotas do Aplicativo Principal ---
 
 @app.route('/')
-@login_required
+#@login_required
 def home():
     usuario_id = current_user.id
     active_tag = request.args.get('tag')
@@ -171,7 +167,7 @@ def home():
     )
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def cadastrar():
     usuario_id = current_user.id
     #conn = get_db_connection()
@@ -315,7 +311,7 @@ def login():
 
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def editar(id):
     usuario_id = current_user.id
     lembretes = ler_lembretes_cache(usuario_id)
@@ -369,7 +365,7 @@ def editar(id):
 
 
 @app.route('/logout')
-@login_required
+#@login_required
 def logout():
     try:
         # ⚡️ Sincroniza com Postgre antes de sair
@@ -386,7 +382,7 @@ def logout():
 
 
 @app.route('/suporte', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def suporte():
     if request.method == 'POST':
         assunto = request.form['assunto']
@@ -433,7 +429,7 @@ app.add_url_rule('/change_password', 'change_password', change_password_route, m
 
 
 @app.route('/sincronizar', methods=['POST'])
-@login_required
+#@login_required
 def sincronizar():
     try:
         sincronizar_cache_com_postgre(current_user.id, app.config['DB_CONN_PARAMS'])
