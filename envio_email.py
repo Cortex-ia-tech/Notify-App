@@ -62,7 +62,7 @@ for id_, nome, vencimento, dias_antes, email_usuario in licencas:
     mensagem = MIMEMultipart()
     mensagem["From"] = remetente
     mensagem["To"] = email_usuario
-    mensagem["Subject"] = f"📌 Lembrete: {nome} vence em {vencimento.strftime('%d/%m/%Y')} 📆"
+    mensagem["Subject"] = f"📌📆 Lembrete: {nome} vence em {vencimento.strftime('%d/%m/%Y')} "
     corpo = f"""
 Olá,
 
