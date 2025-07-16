@@ -57,6 +57,9 @@
                             <li>
                                 <span>{{ nome }} - vence em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
                                 <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                                <form action="{{ url_for('excluir', id=id_) }}" method="post" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
+                                    <button class="botaoexcluir" type="submit" style="background:none; border:none; color:#c00; cursor:pointer; margin-left:10px;">Excluir</button>
+                                </form>
                             </li>
                         {% endfor %}
                         </ul>
@@ -73,6 +76,9 @@
                             <li>
                                 <span>{{ nome }} - venceu em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
                                 <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                                <form action="{{ url_for('excluir', id=id_) }}" method="post" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
+                                    <button type="submit" style="background:none; border:none; color:#c00; cursor:pointer; margin-left:10px;">Excluir</button>
+                                </form>
                             </li>
                         {% endfor %}
                         </ul>

@@ -171,9 +171,40 @@ def home():
         active_tag=active_tag
     )
 
+
+@app.route('/excluir/<int:id>', methods=['POST'])
+def excluir(id):
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    usuario_id = current_user.id
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Verifica se o lembrete pertence ao usuário logado
+        cur.execute('SELECT id FROM lembretes WHERE id = %s AND usuario_id = %s', (id, usuario_id))
+        lembrete = cur.fetchone()
+
+        if not lembrete:
+            return redirect(url_for('home'))
+
+        # Executa exclusão
+        cur.execute('DELETE FROM lembretes WHERE id = %s', (id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        print(f"Erro ao excluir lembrete: {e}")
+
+    return redirect(url_for('home'))
+
+
+
 @app.route('/cadastrar', methods=['GET', 'POST'])
 #@login_required
-
 
 def cadastrar():
 
