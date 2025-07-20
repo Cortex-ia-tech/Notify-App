@@ -204,7 +204,7 @@ body {
 .sidebar {
     width: 250px;
     background-color: #ffffff;
-    padding: 20px;
+    padding: 20px; /* Este padding define o espaçamento interno da sidebar */
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
@@ -233,7 +233,7 @@ body {
 
 .tag-list a {
     display: block;
-    padding: 10px 15px;
+    padding: 10px 15px; /* Este padding é o que define a "caixa" dos itens da lista */
     text-decoration: none;
     color: #555;
     border-radius: 6px;
@@ -257,49 +257,53 @@ body {
 
 /* Área de conteúdo principal */
 .main-content {
-    flex-grow: 1; /* Ocupa o restante do espaço horizontalmente */
-    padding: 30px; /* Adicionado padding para espaçamento interno */
-    display: flex; /* Torna o main-content um flex container */
-    flex-direction: column; /* Organiza os itens em coluna */
-    align-items: flex-start; /* Alinha os itens ao início (esquerda) */
-    gap: 20px; /* Espaço entre os elementos filhos do main-content (botão, container, etc.) */
+    flex-grow: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
 }
 
 /* Estilo para o botão de cadastrar novo lembrete */
 .button-section {
-    width: 100%; /* Ocupa a largura total para alinhamento de texto */
-    text-align: left; /* Alinha o botão à esquerda */
-    /* margin-bottom foi movido para o gap do main-content */
+    width: 100%; /* Ocupa a largura total do pai (sidebar) */
+    box-sizing: border-box; /* Garante que padding e borda sejam incluídos na largura */
+    text-decoration: none;
 }
 
-.button-primary {
-    display: inline-block;
-    padding: 14px 25px;
-    font-size: 17px;
-    background-color: #007bff; /* Cor azul primária */
+.sidebar .button-section { /* Seletor específico para o button-section dentro da sidebar */
+    margin-bottom: 20px; /* Espaço abaixo do botão */
+}
+
+a.button-primary {
+    display: block;
+    padding: 10px 15px;
+    font-size: 1em;
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
     text-decoration: none;
     font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-bottom: 10px;
 }
 
-.button-primary:hover {
-    background-color: #0056b3; /* Cor azul mais escura no hover */
-    transform: translateY(-2px);
+a.button-primary:hover {
+    background-color: #0056b3;
 }
 
 /* Container para os quadros de lembretes */
 .container {
-    width: 100%; /* Garante que o container ocupe toda a largura disponível */
-    max-width: 1000px; /* Define a largura máxima dos quadros */
-    /* Centraliza o container na área disponível */
+    width: 100%;
+    max-width: 1000px;
     display: flex;
-    flex-direction: column; /* Organiza os quadros em coluna */
-    gap: 20px; /* Espaço entre os quadros */
+    flex-direction: column;
+    gap: 20px;
 }
 
 .quadro {
@@ -336,9 +340,9 @@ body {
 
 /* Estiliza o formulário de exclusão para que o botão se comporte bem */
 .quadro li form {
-    display: flex; /* Torna o formulário um flex container */
-    align-items: center; /* Alinha o botão verticalmente */
-    margin: 0; /* Remove margens padrão do formulário */
+    display: flex;
+    align-items: center;
+    margin: 0;
 }
 
 .quadro li:last-child {
@@ -354,17 +358,18 @@ body {
     color: #007bff;
     text-decoration: none;
     font-weight: 500;
+    font-size: 1em;
     transition: color 0.3s ease;
-    margin-right: 10px; /* Espaço entre "Editar" e "Excluir" */
+    margin-right: 10px;
 }
 
 .quadro li a:hover {
     color: #0056b3;
-    text-decoration: underline;
+    
 }
 
 .tag-label {
-    background-color: #e0e0e0; /* Cor de fundo para a tag */
+    background-color: #e0e0e0;
     color: #555;
     padding: 3px 8px;
     border-radius: 4px;
@@ -373,31 +378,31 @@ body {
     margin-left: 8px;
 }
 
-/* Estilos para o botão Excluir */
+/* Estilos para o botão Excluir (agora com aparência de link) */
 .button-delete {
     background: none;
     border: none;
     color: #dc3545;
     padding: 0;
     cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 700; /* Alterado para negrito */
+    font-size: 1em;
+    font-weight: 700;
     text-decoration: none;
     transition: color 0.3s ease, text-decoration 0.3s ease;
     margin-left: 10px;
     white-space: nowrap;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .button-delete:hover {
-    color: #ff8b8b; /* Vermelho mais escuro no hover */
-    text-decoration: underline; /* Adiciona sublinhado no hover */
-    transform: none; /* Remove o efeito de levantar */
-    box-shadow: none; /* Remove a sombra */
+    color: #ff8b8b;
+    transform: none;
+    box-shadow: none;
 }
 
 .button-delete:active {
-    color: #a10010; /* Vermelho ainda mais escuro ao clicar */
-    text-decoration: underline;
+    color: #a10010;
+    
 }
 
 
@@ -428,7 +433,7 @@ footer {
     padding: 20px;
     background-color: #ffffff;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    margin-top: auto; /* Empurra o rodapé para baixo */
+    margin-top: auto;
     color: #555;
     font-size: 0.9em;
 }
@@ -437,23 +442,23 @@ footer {
 @media (max-width: 992px) {
     .page-content-wrapper {
         flex-direction: column;
-        padding-top: 70px; /* Ajusta para cabeçalho menor */
+        padding-top: 70px;
     }
 
     .sidebar {
         width: 100%;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         padding-bottom: 10px;
-        flex-direction: row; /* Sidebar como linha em telas menores */
+        flex-direction: row;
         justify-content: center;
-        flex-wrap: wrap; /* Permite que os itens da sidebar quebrem linha */
+        flex-wrap: wrap;
         gap: 10px;
     }
 
     .sidebar h3 {
-        width: 100%; /* Título ocupa largura total */
+        width: 100%;
         text-align: center;
-        border-bottom: none; /* Remove a linha de baixo */
+        border-bottom: none;
         padding-bottom: 0;
         margin-bottom: 10px;
     }
@@ -475,24 +480,24 @@ footer {
     }
 
     .main-content {
-        padding: 20px; /* Reduz padding para telas menores */
-        align-items: center; /* Centraliza o conteúdo principal */
+        padding: 20px;
+        align-items: center;
     }
 
     .button-section {
-        text-align: center; /* Centraliza o botão em telas menores */
+        text-align: center;
+        width: 100%;
     }
 
     .button-primary {
-        width: auto; /* Permite que o botão se ajuste ao conteúdo */
+        width: 100%;
         padding: 12px 20px;
         font-size: 16px;
     }
 
     .container {
-        /* Em telas menores, o container deve ocupar 100% da largura disponível */
-        max-width: 100%; /* Sobrescreve o 500px para responsividade */
-        padding: 0 10px; /* Adiciona um pequeno padding nas laterais */
+        max-width: 100%;
+        padding: 0 10px;
     }
 }
 
@@ -537,7 +542,7 @@ footer {
 
     .quadro li {
         flex-direction: column;
-        align-items: flex-start; /* Alinha o conteúdo à esquerda */
+        align-items: flex-start;
         gap: 5px;
         text-align: left;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -548,24 +553,23 @@ footer {
     }
 
     .quadro li a {
-        align-self: flex-end; /* Move o link "Editar" para a direita */
-        margin-right: 0; /* Remove a margem para não interferir no alinhamento */
+        align-self: flex-end;
+        margin-right: 0;
     }
 
     .quadro li form {
-        width: 100%; /* Ocupa a largura total para alinhar o botão */
-        justify-content: flex-end; /* Alinha o botão "Excluir" à direita dentro do formulário */
-        margin-top: 5px; /* Adiciona um pequeno espaço acima do botão, se ele quebrar linha */
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 5px;
     }
 
     .button-delete {
-        /* O botão já terá padding e outros estilos do seletor geral .button-delete */
-        margin-left: 0; /* Remove a margem esquerda para permitir o alinhamento à direita do pai */
-        width: auto; /* Permite que o botão ajuste sua largura */
+        margin-left: 0;
+        width: auto;
     }
 
     .container {
-        max-width: 100%; /* Garante que se adapte totalmente */
-        padding: 0; /* Remove padding lateral adicional se já tiver no main-content */
+        max-width: 100%;
+        padding: 0;
     }
 }
