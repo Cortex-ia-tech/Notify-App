@@ -291,13 +291,12 @@ body {
     background-color: #0056b3; /* Cor azul mais escura no hover */
     transform: translateY(-2px);
 }
-  
 
 /* Container para os quadros de lembretes */
 .container {
     width: 100%; /* Garante que o container ocupe toda a largura disponível */
     max-width: 1000px; /* Define a largura máxima dos quadros */
-     /* Centraliza o container na área disponível */
+    /* Centraliza o container na área disponível */
     display: flex;
     flex-direction: column; /* Organiza os quadros em coluna */
     gap: 20px; /* Espaço entre os quadros */
@@ -332,13 +331,14 @@ body {
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px dotted #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Estiliza o formulário de exclusão para que o botão se comporte bem */
 .quadro li form {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
+    display: flex; /* Torna o formulário um flex container */
+    align-items: center; /* Alinha o botão verticalmente */
+    margin: 0; /* Remove margens padrão do formulário */
 }
 
 .quadro li:last-child {
@@ -355,6 +355,7 @@ body {
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
+    margin-right: 10px; /* Espaço entre "Editar" e "Excluir" */
 }
 
 .quadro li a:hover {
@@ -371,6 +372,34 @@ body {
     font-weight: 500;
     margin-left: 8px;
 }
+
+/* Estilos para o botão Excluir */
+.button-delete {
+    background: none;
+    border: none;
+    color: #dc3545;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 700; /* Alterado para negrito */
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.button-delete:hover {
+    color: #ff8b8b; /* Vermelho mais escuro no hover */
+    text-decoration: underline; /* Adiciona sublinhado no hover */
+    transform: none; /* Remove o efeito de levantar */
+    box-shadow: none; /* Remove a sombra */
+}
+
+.button-delete:active {
+    color: #a10010; /* Vermelho ainda mais escuro ao clicar */
+    text-decoration: underline;
+}
+
 
 /* Mensagens de feedback (flash messages) */
 .flash-message {
@@ -508,9 +537,10 @@ footer {
 
     .quadro li {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: flex-start; /* Alinha o conteúdo à esquerda */
         gap: 5px;
         text-align: left;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .quadro li span {
@@ -519,6 +549,19 @@ footer {
 
     .quadro li a {
         align-self: flex-end; /* Move o link "Editar" para a direita */
+        margin-right: 0; /* Remove a margem para não interferir no alinhamento */
+    }
+
+    .quadro li form {
+        width: 100%; /* Ocupa a largura total para alinhar o botão */
+        justify-content: flex-end; /* Alinha o botão "Excluir" à direita dentro do formulário */
+        margin-top: 5px; /* Adiciona um pequeno espaço acima do botão, se ele quebrar linha */
+    }
+
+    .button-delete {
+        /* O botão já terá padding e outros estilos do seletor geral .button-delete */
+        margin-left: 0; /* Remove a margem esquerda para permitir o alinhamento à direita do pai */
+        width: auto; /* Permite que o botão ajuste sua largura */
     }
 
     .container {
