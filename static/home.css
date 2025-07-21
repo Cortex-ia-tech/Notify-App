@@ -52,6 +52,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    
 }
 
 /* Header fixo no topo */
@@ -335,7 +336,7 @@ a.button-primary:hover {
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px dotted #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 15px;
 }
 
 /* Estiliza o formulário de exclusão para que o botão se comporte bem */
@@ -358,7 +359,7 @@ a.button-primary:hover {
     color: #007bff;
     text-decoration: none;
     font-weight: 500;
-    font-size: 1em;
+    font-size: 16px;
     transition: color 0.3s ease;
     margin-right: 10px;
 }
@@ -570,6 +571,7 @@ footer {
     .button-delete {
         margin-left: 0;
         width: auto;
+        
     }
 
     .container {
