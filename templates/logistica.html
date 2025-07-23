@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Logística - Notify{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='logistica.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="tabela-logistica">
+    <table>
+        <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Data 1</th>
+                <th>Data 2</th>
+                <th>Data 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(6) %}
+            <tr>
+                <td>
+                    <select>
+                        <option value="">Selecione</option>
+                        {% for placa in placas %}
+                        <option value="{{ placa }}">{{ placa }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="date"></td>
+                <td><input type="date"></td>
+                <td><input type="date"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

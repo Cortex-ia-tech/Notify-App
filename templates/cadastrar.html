@@ -1,74 +1,70 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Lembrete</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='cadastrar.css') }}">
-</head>
-<body>
-    <div class="main-container">
-        <h1>Cadastrar novo lembrete</h1>
+{% extends 'base.html' %}
 
-        <form method="POST" action="/cadastrar">
-            <div class="input-group">
-                <label for="nome_licenca">Nome do lembrete:</label>
-                <input type="text" id="nome_licenca" name="nome" value="{{ nome_licenca if nome_licenca is defined else '' }}" required>
-            </div>
+{% block title %}Cadastrar Lembrete - Notify{% endblock %}
 
-            <div class="input-group">
-                <label for="data_vencimento">Data de vencimento:</label>
-                <input type="date" id="data_vencimento" name="vencimento" value="{{ data_vencimento if data_vencimento is defined else '' }}" required>
-            </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='cadastrar.css') }}">
+{% endblock %}
 
-            <div class="input-group">
-                <label for="dias_antes">Alerta com antecedência (dias):</label>
-                <input type="number" id="dias_antes" name="dias_antes" min="1" placeholder="Ex: 30" value="{{ dias_antes if dias_antes is defined else '' }}" required>
-            </div>
+{% block content %}
+<div class="main-container">
+    <h1>Cadastrar novo lembrete</h1>
 
-            <div class="input-group">
-                <label for="marcador_existente">Marcador (categoria):</label>
-                <select id="marcador_existente" name="marcador_existente" required onchange="toggleNewTagInput()">
-                    <option value="">Selecione um marcador</option>
-                    {% for tag in marcadores_existentes %}
-                        <option value="{{ tag }}" {% if tag == marcador_selecionado %}selected{% endif %}>{{ tag }}</option>
-                    {% endfor %}
-                    <option value="novo_marcador" {% if marcador_selecionado == 'novo_marcador' %}selected{% endif %}>*** Novo Marcador ***</option>
-                </select>
-            </div>
+    <form method="POST" action="/cadastrar">
+        <div class="input-group">
+            <label for="nome_licenca">Nome do lembrete:</label>
+            <input type="text" id="nome_licenca" name="nome" value="{{ nome_licenca if nome_licenca is defined else '' }}" required>
+        </div>
 
-            <div class="input-group" id="novo_marcador_input_group" style="display: none;">
-                <label for="novo_marcador_input">Nome do Novo Marcador:</label>
-                <input type="text" id="novo_marcador_input" name="novo_marcador_input" placeholder="Digite o nome do novo marcador" value="{{ novo_marcador_input if novo_marcador_input is defined else '' }}">
-            </div>
-            <button type="submit">Salvar</button>
-        </form>
+        <div class="input-group">
+            <label for="data_vencimento">Data de vencimento:</label>
+            <input type="date" id="data_vencimento" name="vencimento" value="{{ data_vencimento if data_vencimento is defined else '' }}" required>
+        </div>
 
-        <p class="back-link"><a href="/">← Voltar para Home</a></p>
-    </div>
+        <div class="input-group">
+            <label for="dias_antes">Alerta com antecedência (dias):</label>
+            <input type="number" id="dias_antes" name="dias_antes" min="1" placeholder="Ex: 30" value="{{ dias_antes if dias_antes is defined else '' }}" required>
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Garante que a lógica é executada quando a página é carregada
-            // Isso é importante se o formulário foi submetido com erro e precisa manter o estado
-            toggleNewTagInput(); 
-        });
+        <div class="input-group">
+            <label for="marcador_existente">Marcador (categoria):</label>
+            <select id="marcador_existente" name="marcador_existente" required onchange="toggleNewTagInput()">
+                <option value="">Selecione um marcador</option>
+                {% for tag in marcadores_existentes %}
+                    <option value="{{ tag }}" {% if tag == marcador_selecionado %}selected{% endif %}>{{ tag }}</option>
+                {% endfor %}
+                <option value="novo_marcador" {% if marcador_selecionado == 'novo_marcador' %}selected{% endif %}>*** Novo Marcador ***</option>
+            </select>
+        </div>
 
-        function toggleNewTagInput() {
-            var selectElement = document.getElementById('marcador_existente');
-            var newTagInputGroup = document.getElementById('novo_marcador_input_group');
-            var newTagInput = document.getElementById('novo_marcador_input');
+        <div class="input-group" id="novo_marcador_input_group" style="display: none;">
+            <label for="novo_marcador_input">Nome do Novo Marcador:</label>
+            <input type="text" id="novo_marcador_input" name="novo_marcador_input" placeholder="Digite o nome do novo marcador" value="{{ novo_marcador_input if novo_marcador_input is defined else '' }}">
+        </div>
+        <button type="submit">Salvar</button>
+    </form>
 
-            if (selectElement.value === 'novo_marcador') {
-                newTagInputGroup.style.display = 'block'; // Mostra o campo
-                newTagInput.setAttribute('required', 'required'); // Torna o campo obrigatório
-            } else {
-                newTagInputGroup.style.display = 'none'; // Esconde o campo
-                newTagInput.removeAttribute('required'); // Remove a obrigatoriedade
-                newTagInput.value = ''; // Limpa o valor do campo oculto quando não é "novo_marcador"
-            }
+    <p class="back-link"><a href="{{ url_for('home') }}">← Voltar para Home</a></p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleNewTagInput(); 
+    });
+
+    function toggleNewTagInput() {
+        var selectElement = document.getElementById('marcador_existente');
+        var newTagInputGroup = document.getElementById('novo_marcador_input_group');
+        var newTagInput = document.getElementById('novo_marcador_input');
+
+        if (selectElement.value === 'novo_marcador') {
+            newTagInputGroup.style.display = 'block';
+            newTagInput.setAttribute('required', 'required');
+        } else {
+            newTagInputGroup.style.display = 'none';
+            newTagInput.removeAttribute('required');
+            newTagInput.value = '';
         }
-    </script>
-    </body>
-</html>
+    }
+</script>
+{% endblock %}

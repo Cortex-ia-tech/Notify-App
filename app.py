@@ -456,16 +456,16 @@ def suporte():
                 recipients=[destinatario_suporte]
             )
             msg.body = f"""
-Mensagem de suporte de: {remetente_nome} ({remetente_email})
+                Mensagem de suporte de: {remetente_nome} ({remetente_email})
 
-Assunto: {assunto}
+                Assunto: {assunto}
 
-Mensagem:
-{mensagem_usuario}
+                Mensagem:
+                {mensagem_usuario}
 
----
-Enviado via formulário de suporte do Notify.
-            """
+                ---
+                Enviado via formulário de suporte do Notify.
+                            """
             app.mail.send(msg)
             flash('Sua demanda de suporte foi enviada com sucesso! Em breve entraremos em contato.', 'success')
             return redirect(url_for('home'))
@@ -473,8 +473,8 @@ Enviado via formulário de suporte do Notify.
             app.logger.error(f"Erro ao enviar demanda de suporte de {remetente_email}: {e}")
             flash('Ocorreu um erro ao enviar sua demanda de suporte. Por favor, tente novamente mais tarde.', 'danger')
             return render_template('suporte.html',
-                                   assunto_preenchido=assunto,
-                                   mensagem_preenchida=mensagem_usuario)
+                                assunto_preenchido=assunto,
+                                mensagem_preenchida=mensagem_usuario)
 
     return render_template('suporte.html')
 
@@ -482,6 +482,18 @@ Enviado via formulário de suporte do Notify.
 app.add_url_rule('/forgot_password', 'forgot_password', forgot_password_route, methods=['GET', 'POST'])
 app.add_url_rule('/reset_password/<token>', 'reset_password', reset_password_route, methods=['GET', 'POST'])
 app.add_url_rule('/change_password', 'change_password', change_password_route, methods=['GET', 'POST'])
+
+
+@app.route('/logistica')
+def logistica():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    # Exemplo: placas simuladas — você vai substituir depois por leitura do SQLite ou Postgre
+    placas = ["ABC-1234", "XYZ-5678", "JKL-9012", "GHI-3456"]
+
+    return render_template('logistica.html', placas=placas)
+
 
 
 @app.route('/sincronizar', methods=['POST'])

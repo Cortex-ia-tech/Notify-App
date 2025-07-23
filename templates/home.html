@@ -1,158 +1,91 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notify - Home</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
-</head>
-<body>
-    <header class="top-nav">
-        <div class="logo-area">
-            <span class="logo">Notify<sup>®</sup></span>
+{% extends 'base.html' %}
+
+{% block title %}Notify - Home{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content-wrapper">
+    <aside class="sidebar">
+        <div class="button-section">
+            <a href="{{ url_for('cadastrar') }}" class="button-primary">+ Novo lembrete</a>
         </div>
-        <nav class="menu-links">
-            <a href="{{ url_for('home') }}" class="menu-item {% if request.path == '/' %}active{% endif %}">Lembretes</a>
-            <a href="#" class="menu-item">Logística</a>
-        </nav>
-        <div class="user-area">
-            {% if current_user.is_authenticated %}
-                <div class="user-box" onclick="toggleDropdown()">
-                    <span class="user-name">Olá, {{ current_user.nome }}</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="dropdown" id="dropdownMenu">
-                    <a href="{{ url_for('suporte') }}">Falar com Suporte</a>
-                    <a href="{{ url_for('logout') }}">Sair</a>
-                </div>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="login">Entrar</a>
-            {% endif %}
+        <h3>Marcadores</h3>
+        <ul class="tag-list">
+            <li><a href="{{ url_for('home') }}" class="{% if not active_tag %}active{% endif %}">Todos os Lembretes</a></li>
+            {% for tag in marcadores %}
+                <li><a href="{{ url_for('home', tag=tag) }}" class="{% if active_tag == tag %}active{% endif %}">{{ tag }}</a></li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="quadro">
+                <h2>Lembretes ativos:</h2>
+                {% if a_vencer %}
+                    <ul>
+                    {% for id_, nome, vencimento, marcador in a_vencer %}
+                        <li>
+                            <span>{{ nome }} - vence em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
+                            <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                            <form action="{{ url_for('excluir', id=id_) }}" method="post" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
+                                <button type="submit" class="button-delete">Excluir</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Nenhum lembrete ativo cadastrado{% if active_tag %} para o marcador "{{ active_tag }}"{% endif %}.</p>
+                {% endif %}
+            </div>
+
+            <div class="quadro">
+                <h2>Lembretes expirados:</h2>
+                {% if vencidas %}
+                    <ul>
+                    {% for id_, nome, vencimento, marcador in vencidas %}
+                        <li>
+                            <span>{{ nome }} - venceu em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
+                            <a href="{{ url_for('editar', id=id_) }}">Editar</a>
+                            <form action="{{ url_for('excluir', id=id_) }}" method="post" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
+                                <button type="submit" class="button-delete">Excluir</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Nenhum lembrete expirado cadastrado{% if active_tag %} para o marcador "{{ active_tag }}"{% endif %}.</p>
+                {% endif %}
+            </div>
         </div>
+    </main>
+</div>
 
-    </header>
+<footer>
+    <p>
+        Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
+    </p>
+</footer>
 
-
-    <div class="page-content-wrapper">
-        <aside class="sidebar">
-            <div class="button-section">
-                <a href="{{ url_for('cadastrar') }}" class="button-primary">+ Novo lembrete</a>
-            </div>
-            <h3>Marcadores</h3>
-            <ul class="tag-list">
-                <li><a href="{{ url_for('home') }}" class="{% if not active_tag %}active{% endif %}">Todos os Lembretes</a></li>
-                {% for tag in marcadores %}
-                    <li><a href="{{ url_for('home', tag=tag) }}" class="{% if active_tag == tag %}active{% endif %}">{{ tag }}</a></li>
-                {% endfor %}
-            </ul>
-        </aside>
-
-        <main class="main-content">
-            <div class="container">
-                <div class="quadro">
-                    <h2>Lembretes ativos:</h2>
-                    {% if a_vencer %}
-                        <ul>
-                        {% for id_, nome, vencimento, marcador in a_vencer %}
-                            <li>
-                                <span>{{ nome }} - vence em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
-                                <a href="{{ url_for('editar', id=id_) }}">Editar</a>
-                                <form action="{{ url_for('excluir', id=id_) }}" method="post" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
-                                    <button type="submit" class="button-delete">Excluir</button>
-                                </form>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>Nenhum lembrete ativo cadastrado{% if active_tag %} para o marcador "{{ active_tag }}"{% endif %}.</p>
-                    {% endif %}
-                </div>
-
-                <div class="quadro">
-                    <h2>Lembretes expirados:</h2>
-                    {% if vencidas %}
-                        <ul>
-                        {% for id_, nome, vencimento, marcador in vencidas %}
-                            <li>
-                                <span>{{ nome }} - venceu em {{ vencimento.strftime('%d/%m/%Y') }} <span class="tag-label">[{{ marcador }}]</span></span>
-                                <a href="{{ url_for('editar', id=id_) }}">Editar</a>
-                                <form action="{{ url_for('excluir', id=id_) }}" method="post" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
-                                    <button type="submit" class="button-delete">Excluir</button>
-                                </form>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>Nenhum lembrete expirado cadastrado{% if active_tag %} para o marcador "{{ active_tag }}"{% endif %}.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <footer>
-        <p>
-            Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
-        </p>
-    </footer>
-
-    <script>
-        function toggleDropdown() {
-            document.getElementById("userDropdown").classList.toggle("show");
-        }
-
-        window.onclick = function(event) {
-            if (!event.target.closest('.username-wrapper') && !event.target.closest('.dropdown-menu')) {
-                var dropdowns = document.getElementsByClassName("dropdown-menu");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
+<script>
+    function sincronizarPeriodicamente() {
+        fetch('/sincronizar', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    console.log('Sincronização automática concluída');
+                } else {
+                    console.warn('Erro na sincronização:', data.mensagem);
                 }
-            }
-        }
-    </script>
+            })
+            .catch(err => {
+                console.error('Falha ao tentar sincronizar:', err);
+            });
+    }
 
-    <script>
-        function sincronizarPeriodicamente() {
-            fetch('/sincronizar', { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'ok') {
-                        console.log('Sincronização automática concluída');
-                    } else {
-                        console.warn('Erro na sincronização:', data.mensagem);
-                    }
-                })
-                .catch(err => {
-                    console.error('Falha ao tentar sincronizar:', err);
-                });
-        }
-
-        setInterval(sincronizarPeriodicamente, 5 * 60 * 1000);
-    </script>
-
-    <script>
-        function toggleDropdown() {
-            const dropdown = document.getElementById('dropdownMenu');
-            dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
-        }
-
-        // Fecha o dropdown ao clicar fora
-        window.onclick = function(event) {
-            const dropdown = document.getElementById('dropdownMenu');
-            const userBox = document.querySelector('.user-box');
-
-            if (!userBox.contains(event.target)) {
-                dropdown.style.display = 'none';
-            }
-        };
-    </script>
-
-
-</body>
-</html>
+    setInterval(sincronizarPeriodicamente, 5 * 60 * 1000);
+</script>
+{% endblock %}
