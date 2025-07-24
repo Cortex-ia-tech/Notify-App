@@ -1,5 +1,5 @@
 # app.py
-from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite, inserir_placa_cache, ler_placas_cache, salvar_campo_logistica, ler_logistica_cache, sincronizar_logistica_com_postgre
+from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite, salvar_campo_logistica, sincronizar_logistica_com_postgre
 from flask import jsonify
 from random import randint
 from flask import Flask, render_template, request, redirect, session, url_for, flash
@@ -483,30 +483,50 @@ app.add_url_rule('/change_password', 'change_password', change_password_route, m
 def logistica():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
-    
-    placas = ler_placas_cache()
-    linhas = ler_logistica_cache()
-    return render_template('logistica.html', placas=placas, linhas=linhas)
 
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-@app.route('/salvar_placa', methods=['POST'])
-def salvar_placa():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
+        # Lê todas as linhas da tabela logistica (Supabase)
+        cur.execute("""
+            SELECT placa, afericao, cipp, civ, tacografo,
+                   aet_federal, aet_bahia, aet_goias,
+                   aet_alagoas, aet_minas_gerais
+            FROM logistica
+            ORDER BY placa
+        """)
+        resultados = cur.fetchall()
 
-    nova_placa = request.form.get('placa', '').strip().upper()
-    if nova_placa:
-        try:
-            inserir_placa_cache(nova_placa)
-            return jsonify({'status': 'ok'})
-        except Exception as e:
-            return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+        # Transforma em lista de dicionários
+        linhas = [
+            {
+                'placa': row[0],
+                'afericao': row[1],
+                'cipp': row[2],
+                'civ': row[3],
+                'tacografo': row[4],
+                'aet_federal': row[5],
+                'aet_bahia': row[6],
+                'aet_goias': row[7],
+                'aet_alagoas': row[8],
+                'aet_minas_gerais': row[9]
+            }
+            for row in resultados
+        ]
 
-    return jsonify({'status': 'erro', 'mensagem': 'Placa vazia'}), 400
+        # Lista de placas (para o datalist)
+        placas = sorted(set(row[0] for row in resultados))
 
+        cur.close()
+        conn.close()
 
+        return render_template('logistica.html', placas=placas, linhas=linhas)
 
-from persist.cache import salvar_campo_logistica
+    except Exception as e:
+        print("Erro ao carregar dados da logística:", e)
+        return render_template('logistica.html', placas=[], linhas=[])
+
 
 @app.route('/salvar_campo_logistica', methods=['POST'])
 def salvar_campo_logistica_route():
@@ -556,6 +576,50 @@ def sincronizar():
 # Garante que as tabelas sejam criadas ao iniciar o aplicativo
 with app.app_context():
     criar_tabela()
+
+@app.route('/salvar_linha_logistica', methods=['POST'])
+def salvar_linha_logistica():
+    if not current_user.is_authenticated:
+        return jsonify({'status': 'erro', 'mensagem': 'Usuário não autenticado'}), 401
+
+    try:
+        dados = request.get_json()
+        print("📥 Dados recebidos no backend:", dados)
+
+        placa = dados.get('placa', '').strip().upper()
+        if not placa:
+            return jsonify({'status': 'erro', 'mensagem': 'Placa obrigatória'}), 400
+
+        campos = [
+            'afericao', 'cipp', 'civ', 'tacografo',
+            'aet_federal', 'aet_bahia', 'aet_goias',
+            'aet_alagoas', 'aet_minas_gerais'
+        ]
+
+        valores = [dados.get(campo, '').strip() for campo in campos]
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute(f"""
+            INSERT INTO logistica (placa, {', '.join(campos)}, data_modificacao)
+            VALUES (%s, {', '.join(['%s'] * len(campos))}, NOW())
+            ON CONFLICT (placa) DO UPDATE SET
+                {', '.join([f"{campo} = EXCLUDED.{campo}" for campo in campos])},
+                data_modificacao = NOW();
+        """, [placa] + valores)
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        print("✅ Linha salva com sucesso:", placa)
+        return jsonify({'status': 'ok', 'mensagem': 'Dados salvos com sucesso'})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
 
 if __name__ == '__main__':

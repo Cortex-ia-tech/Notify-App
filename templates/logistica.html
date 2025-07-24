@@ -54,7 +54,6 @@
                 </tr>
             {% endif %}
         </tbody>
-
     </table>
 </div>
 
@@ -73,92 +72,89 @@
 
 {% block scripts %}
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    let linhaIndex = {{ linhas|length if linhas else 1 }}; 
 
-let linhaIndex = {{ linhas|length if linhas else 1 }}; 
+    function criarLinha(index) {
+        const tbody = document.getElementById('corpo-logistica');
+        const tr = document.createElement('tr');
 
-function criarLinha(index) {
-    const tbody = document.getElementById('corpo-logistica');
-    const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input list="placas" name="placa_${index}" placeholder="Digite ou escolha" required></td>
+            <td><input type="text" name="afericao_${index}"></td>
+            <td><input type="text" name="cipp_${index}"></td>
+            <td><input type="text" name="civ_${index}"></td>
+            <td><input type="text" name="tacografo_${index}"></td>
+            <td><input type="text" name="aet_federal_${index}"></td>
+            <td><input type="text" name="aet_bahia_${index}"></td>
+            <td><input type="text" name="aet_goias_${index}"></td>
+            <td><input type="text" name="aet_alagoas_${index}"></td>
+            <td><input type="text" name="aet_minas_gerais_${index}"></td>
+        `;
 
-    tr.innerHTML = `
-        <td><input list="placas" name="placa_${index}" placeholder="Digite ou escolha" required></td>
-        <td><input type="text" name="afericao_${index}"></td>
-        <td><input type="text" name="cipp_${index}"></td>
-        <td><input type="text" name="civ_${index}"></td>
-        <td><input type="text" name="tacografo_${index}"></td>
-        <td><input type="text" name="aet_federal_${index}"></td>
-        <td><input type="text" name="aet_bahia_${index}"></td>
-        <td><input type="text" name="aet_goias_${index}"></td>
-        <td><input type="text" name="aet_alagoas_${index}"></td>
-        <td><input type="text" name="aet_minas_gerais_${index}"></td>
-    `;
+        tbody.appendChild(tr);
+        adicionarEventosLinha(tr, index);
+    }
 
-    tbody.appendChild(tr);
+    function adicionarEventosLinha(tr, index) {
+        const placaInput = tr.querySelector(`input[list="placas"]`);
+        const inputs = tr.querySelectorAll('input');
 
-    const inputPlaca = tr.querySelector(`input[list="placas"]`);
-    inputPlaca.addEventListener('change', () => {
-        const placa = inputPlaca.value.trim().toUpperCase();
-        if (placa) {
-            fetch('/salvar_placa', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `placa=${encodeURIComponent(placa)}`
-            });
+        // Ativa salvamento quando os campos mudam
+        inputs.forEach(input => {
+            if (input !== placaInput) {
+                input.addEventListener('input', () => {
+                    const placa = placaInput.value.trim().toUpperCase();
+                    if (placa.length >= 7) {
+                        salvarLinha(tr);
+                    }
+                });
+            }
+        });
 
-            if (index === linhaIndex) {
+        // Quando o usuário termina de digitar a placa
+        placaInput.addEventListener('change', () => {
+            const placa = placaInput.value.trim().toUpperCase();
+
+            if (placa.length >= 7 && index === linhaIndex) {
                 linhaIndex++;
                 criarLinha(linhaIndex);
             }
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const tbody = document.getElementById('corpo-logistica');
-    const ultimasLinhas = tbody.querySelectorAll('tr');
-    const ultimaLinha = ultimasLinhas[ultimasLinhas.length - 1];
-
-    if (ultimaLinha) {
-        const inputPlaca = ultimaLinha.querySelector('input[list="placas"]');
-        if (inputPlaca) {
-            inputPlaca.addEventListener('change', () => {
-                const placa = inputPlaca.value.trim().toUpperCase();
-                if (placa) {
-                    fetch('/salvar_placa', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `placa=${encodeURIComponent(placa)}`
-                    });
-
-                    criarLinha(linhaIndex);
-                    linhaIndex++;
-                }
-            });
-        }
-    }
-});
-
-document.addEventListener('input', function(event) {
-    const input = event.target;
-    const name = input.name;
-
-    if (!name || !name.includes('_')) return;
-
-    const [campo, index] = name.split('_');
-    const linha = input.closest('tr');
-    const placaInput = linha.querySelector('input[list="placas"]');
-    if (!placaInput) return;
-
-    const placa = placaInput.value.trim().toUpperCase();
-    const valor = input.value.trim();
-
-    if (placa) {
-        fetch('/salvar_campo_logistica', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `placa=${encodeURIComponent(placa)}&campo=${encodeURIComponent(campo)}&valor=${encodeURIComponent(valor)}`
         });
     }
+
+    function salvarLinha(tr) {
+        const inputs = tr.querySelectorAll('input');
+        const dados = {};
+        inputs.forEach(input => {
+            const nome = input.name.split('_')[0];
+            dados[nome] = input.value.trim();
+        });
+
+        if (!dados.placa || dados.placa.length < 8) return;
+
+        console.log("🟡 Salvando dados da linha:", dados);
+
+        fetch("/salvar_linha_logistica", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        })
+        .then(response => response.json())
+        .then(resposta => {
+            console.log("✅ Resposta do servidor:", resposta);
+        })
+        .catch(erro => {
+            console.error("❌ Erro ao salvar:", erro);
+        });
+    }
+
+    // Adiciona eventos nas linhas já existentes
+    document.querySelectorAll('#corpo-logistica tr').forEach((tr, index) => {
+        adicionarEventosLinha(tr, index);
+    });
 });
 </script>
 {% endblock %}
