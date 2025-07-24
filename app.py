@@ -97,15 +97,6 @@ def criar_tabela():
         )
     ''')
 
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS veiculos (
-            id SERIAL PRIMARY KEY,
-            placa TEXT NOT NULL,
-            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
-        )
-    ''')
-
-
     conn.commit()
     conn.close()
 
