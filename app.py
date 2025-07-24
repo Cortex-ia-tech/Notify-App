@@ -71,9 +71,6 @@ def criar_tabela():
         )
     ''')
 
-    # Altere a tabela de licencas para adicionar a nova coluna 'marcador'
-    # Esta abordagem é para quando você NÃO USA Flask-Migrate (Alembic)
-    # Ela tenta adicionar a coluna, e se ela já existe (erro de "duplicate column"), ignora.
     try:
         c.execute('''
             ALTER TABLE licencas
@@ -89,9 +86,6 @@ def criar_tabela():
         conn.rollback()
         print(f"Erro ao adicionar coluna 'marcador': {e}")
 
-
-    # Cria a tabela de licenças (garantindo que usuario_id esteja presente)
-    # Mantemos o IF NOT EXISTS aqui, mas o foco é o ALTER TABLE acima para adicionar a coluna
     c.execute('''
         CREATE TABLE IF NOT EXISTS licencas (
             id SERIAL PRIMARY KEY,
@@ -102,6 +96,15 @@ def criar_tabela():
             marcador TEXT NOT NULL DEFAULT 'Geral' -- Garante que a coluna esteja aqui se a tabela for criada do zero
         )
     ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS veiculos (
+            id SERIAL PRIMARY KEY,
+            placa TEXT NOT NULL,
+            usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
+        )
+    ''')
+
 
     conn.commit()
     conn.close()
