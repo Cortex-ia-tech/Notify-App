@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const placaInput = tr.querySelector(`input[list="placas"]`);
         const inputs = tr.querySelectorAll('input');
 
-        // Ativa salvamento quando os campos mudam
+        // Ativa salvamento quando os campos mudam (exceto a própria placa)
         inputs.forEach(input => {
             if (input !== placaInput) {
                 input.addEventListener('input', () => {
@@ -112,16 +112,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Quando o usuário termina de digitar a placa
-        placaInput.addEventListener('change', () => {
+        // Ao sair do campo placa (blur) ou mudar valor (change)
+        placaInput.addEventListener('change', bloquearPlaca);
+        placaInput.addEventListener('blur', bloquearPlaca);
+
+        function bloquearPlaca() {
             const placa = placaInput.value.trim().toUpperCase();
 
-            if (placa.length >= 7 && index === linhaIndex) {
-                linhaIndex++;
-                criarLinha(linhaIndex);
+            if (placa.length >= 7) {
+                placaInput.value = placa;
+                placaInput.readOnly = true;  // 🔒 bloqueia o campo
+                salvarLinha(tr);
+
+                if (index === linhaIndex) {
+                    linhaIndex++;
+                    criarLinha(linhaIndex);
+                }
             }
-        });
+        }
     }
+
 
     function salvarLinha(tr) {
         const inputs = tr.querySelectorAll('input');
