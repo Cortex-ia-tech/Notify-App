@@ -73,7 +73,8 @@
 
 {% block scripts %}
 <script>
-let linhaIndex = {{ linhas|length if linhas else 1 }};
+
+let linhaIndex = {{ linhas|length if linhas else 1 }}; 
 
 function criarLinha(index) {
     const tbody = document.getElementById('corpo-logistica');

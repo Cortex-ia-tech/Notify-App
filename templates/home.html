@@ -87,5 +87,8 @@
     }
 
     setInterval(sincronizarPeriodicamente, 5 * 60 * 1000);
+    setInterval(() => {
+        fetch('/sincronizar_logistica', { method: 'POST' });
+    }, 5 * 60 * 1000);
 </script>
 {% endblock %}

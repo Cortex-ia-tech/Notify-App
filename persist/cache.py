@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import psycopg2
+from psycopg2 import sql
 from datetime import datetime
 
 # Caminho para armazenar os arquivos SQLite locais
@@ -240,4 +241,107 @@ def salvar_campo_logistica(placa, campo, valor):
     conn.commit()
     conn.close()
 
+
+def sincronizar_logistica_com_postgre(db_conn_params):
+    from psycopg2 import sql
+
+    caminho = caminho_cache('compartilhado')
+    if not os.path.exists(caminho):
+        print("❌ Arquivo de cache logística não encontrado.")
+        return
+
+    conn_sqlite = sqlite3.connect(caminho)
+    c_sqlite = conn_sqlite.cursor()
+
+    criar_tabela_logistica_sqlite()
+
+    c_sqlite.execute('''
+        SELECT * FROM logistica
+        WHERE 
+            afericao_modificado = 1 OR
+            cipp_modificado = 1 OR
+            civ_modificado = 1 OR
+            tacografo_modificado = 1 OR
+            aet_federal_modificado = 1 OR
+            aet_bahia_modificado = 1 OR
+            aet_goias_modificado = 1 OR
+            aet_alagoas_modificado = 1 OR
+            aet_minas_gerais_modificado = 1
+    ''')
+
+    registros = c_sqlite.fetchall()
+    colunas = [desc[0] for desc in c_sqlite.description]
+
+    if not registros:
+        print("✅ Nenhuma alteração logística para sincronizar.")
+        conn_sqlite.close()
+        return
+
+    try:
+        conn_pg = psycopg2.connect(**db_conn_params)
+        c_pg = conn_pg.cursor()
+
+        for linha in registros:
+            dados = dict(zip(colunas, linha))
+            placa = dados['placa']
+            print(f"🔄 Sincronizando placa: {placa}")
+
+            # Monta lista de campos modificados
+            campos_modificados = [
+                campo for campo in [
+                    'afericao', 'cipp', 'civ', 'tacografo',
+                    'aet_federal', 'aet_bahia', 'aet_goias',
+                    'aet_alagoas', 'aet_minas_gerais'
+                ]
+                if dados.get(f"{campo}_modificado") == 1
+            ]
+
+            if not campos_modificados:
+                continue
+
+            # Verifica se já existe no PostgreSQL
+            c_pg.execute('SELECT id FROM logistica WHERE placa = %s', (placa,))
+            existe_pg = c_pg.fetchone()
+
+            if existe_pg:
+                # Faz UPDATE apenas dos campos alterados
+                updates = [sql.SQL(f"{campo} = %s") for campo in campos_modificados]
+                valores = [dados.get(campo) for campo in campos_modificados]
+                valores.append(placa)
+
+                query = sql.SQL("UPDATE logistica SET ") + sql.SQL(', ').join(updates) + sql.SQL(" WHERE placa = %s")
+                c_pg.execute(query, valores)
+                print(f"📝 UPDATE feito para {placa}")
+            else:
+                # Faz INSERT com os campos alterados
+                campos = ['placa'] + campos_modificados
+                valores_insert = [placa] + [dados.get(c) for c in campos_modificados]
+
+                campos_sql = sql.SQL(', ').join(sql.Identifier(c) for c in campos)
+                placeholders_sql = sql.SQL(', ').join(sql.Placeholder() * len(campos))
+
+                insert_query = sql.SQL("INSERT INTO logistica ({}) VALUES ({})").format(
+                    campos_sql,
+                    placeholders_sql
+                )
+
+                c_pg.execute(insert_query, valores_insert)
+                print(f"➕ INSERT feito para {placa}")
+
+            # Marca os campos como sincronizados no SQLite
+            for campo in campos_modificados:
+                c_sqlite.execute(f'''
+                    UPDATE logistica
+                    SET {campo}_modificado = 0
+                    WHERE placa = ?
+                ''', (placa,))
+
+        conn_pg.commit()
+        conn_sqlite.commit()
+        print("✅ Sincronização de logística concluída.")
+    except Exception as e:
+        print("❌ ERRO ao sincronizar logística:", e)
+    finally:
+        conn_pg.close()
+        conn_sqlite.close()
 

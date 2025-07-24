@@ -1,5 +1,5 @@
 # app.py
-from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite, inserir_placa_cache, ler_placas_cache, salvar_campo_logistica, ler_logistica_cache
+from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite, inserir_placa_cache, ler_placas_cache, salvar_campo_logistica, ler_logistica_cache, sincronizar_logistica_com_postgre
 from flask import jsonify
 from random import randint
 from flask import Flask, render_template, request, redirect, session, url_for, flash
@@ -429,6 +429,7 @@ def logout():
     try:
         # ⚡️ Sincroniza com Postgre antes de sair
         sincronizar_cache_com_postgre(current_user.id, app.config['DB_CONN_PARAMS'])
+        sincronizar_logistica_com_postgre(app.config['DB_CONN_PARAMS'])
         flash('Dados sincronizados com sucesso.', 'success')
     except Exception as e:
         flash(f'Erro ao sincronizar os dados com o servidor: {e}', 'danger')
@@ -540,6 +541,15 @@ def salvar_campo_logistica_route():
         import traceback
         traceback.print_exc()
         return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
+@app.route('/sincronizar_logistica', methods=['POST'])
+def sincronizar_logistica():
+    try:
+        sincronizar_logistica_com_postgre(app.config['DB_CONN_PARAMS'])
+        return jsonify({'status': 'ok', 'mensagem': 'Logística sincronizada com sucesso!'})
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
 
 
 @app.route('/sincronizar', methods=['POST'])
