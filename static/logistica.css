@@ -2,12 +2,16 @@ body {
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     background: #f4f4f4;
-    padding: 80px 20px;
+    padding: 80px 20px 20px 20px; /* Reduz padding inferior */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .tabela-logistica {
-    max-width: 1000px;
-    margin: 0 auto;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow-x: auto;
     background: white;
     padding: 20px;
     border-radius: 12px;
@@ -15,7 +19,8 @@ body {
 }
 
 table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     border-collapse: separate;
     border-spacing: 0 12px;
 }
@@ -27,18 +32,42 @@ th {
     color: white;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+    white-space: nowrap;
 }
 
 td {
     background: #f9f9f9;
     padding: 10px;
     border-radius: 10px;
+    white-space: nowrap;
 }
 
-select, input[type="date"] {
+select,
+input[type="date"],
+input[type="text"],
+input[list] {
     width: 100%;
     padding: 8px;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 1rem;
+    box-sizing: border-box;
+}
+
+footer {
+    margin-top: 10px;
+    /*padding: 20px;*/
+    text-align: center;
+    font-size: 0.85rem;
+    color: #666;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+
+.conteudo-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }

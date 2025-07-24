@@ -12,28 +12,152 @@
         <thead>
             <tr>
                 <th>Placa</th>
-                <th>Data 1</th>
-                <th>Data 2</th>
-                <th>Data 3</th>
+                <th>Aferição</th>
+                <th>CIPP</th>
+                <th>CIV</th>
+                <th>Tacógrafo</th>
+                <th>AET Federal</th>
+                <th>AET Bahia</th>
+                <th>AET Goiás</th>
+                <th>AET Alagoas</th>
+                <th>AET Minas Gerais</th>
             </tr>
         </thead>
-        <tbody>
-            {% for i in range(6) %}
-            <tr>
-                <td>
-                    <select>
-                        <option value="">Selecione</option>
-                        {% for placa in placas %}
-                        <option value="{{ placa }}">{{ placa }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-                <td><input type="date"></td>
-                <td><input type="date"></td>
-                <td><input type="date"></td>
-            </tr>
-            {% endfor %}
+        <tbody id="corpo-logistica">
+            {% if linhas %}
+                {% for linha in linhas %}
+                <tr>
+                    <td><input list="placas" name="placa_{{ loop.index0 }}" value="{{ linha.placa }}"></td>
+                    <td><input type="text" name="afericao_{{ loop.index0 }}" value="{{ linha.afericao or '' }}"></td>
+                    <td><input type="text" name="cipp_{{ loop.index0 }}" value="{{ linha.cipp or '' }}"></td>
+                    <td><input type="text" name="civ_{{ loop.index0 }}" value="{{ linha.civ or '' }}"></td>
+                    <td><input type="text" name="tacografo_{{ loop.index0 }}" value="{{ linha.tacografo or '' }}"></td>
+                    <td><input type="text" name="aet_federal_{{ loop.index0 }}" value="{{ linha.aet_federal or '' }}"></td>
+                    <td><input type="text" name="aet_bahia_{{ loop.index0 }}" value="{{ linha.aet_bahia or '' }}"></td>
+                    <td><input type="text" name="aet_goias_{{ loop.index0 }}" value="{{ linha.aet_goias or '' }}"></td>
+                    <td><input type="text" name="aet_alagoas_{{ loop.index0 }}" value="{{ linha.aet_alagoas or '' }}"></td>
+                    <td><input type="text" name="aet_minas_gerais_{{ loop.index0 }}" value="{{ linha.aet_minas_gerais or '' }}"></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td><input list="placas" name="placa_0" placeholder="Digite ou escolha"></td>
+                    <td><input type="text" name="afericao_0"></td>
+                    <td><input type="text" name="cipp_0"></td>
+                    <td><input type="text" name="civ_0"></td>
+                    <td><input type="text" name="tacografo_0"></td>
+                    <td><input type="text" name="aet_federal_0"></td>
+                    <td><input type="text" name="aet_bahia_0"></td>
+                    <td><input type="text" name="aet_goias_0"></td>
+                    <td><input type="text" name="aet_alagoas_0"></td>
+                    <td><input type="text" name="aet_minas_gerais_0"></td>
+                </tr>
+            {% endif %}
         </tbody>
+
     </table>
 </div>
+
+<datalist id="placas">
+    {% for placa in placas %}
+    <option value="{{ placa }}">
+    {% endfor %}
+</datalist>
+
+<footer>
+    <p>
+        Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
+    </p>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let linhaIndex = {{ linhas|length if linhas else 1 }};
+
+function criarLinha(index) {
+    const tbody = document.getElementById('corpo-logistica');
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+        <td><input list="placas" name="placa_${index}" placeholder="Digite ou escolha" required></td>
+        <td><input type="text" name="afericao_${index}"></td>
+        <td><input type="text" name="cipp_${index}"></td>
+        <td><input type="text" name="civ_${index}"></td>
+        <td><input type="text" name="tacografo_${index}"></td>
+        <td><input type="text" name="aet_federal_${index}"></td>
+        <td><input type="text" name="aet_bahia_${index}"></td>
+        <td><input type="text" name="aet_goias_${index}"></td>
+        <td><input type="text" name="aet_alagoas_${index}"></td>
+        <td><input type="text" name="aet_minas_gerais_${index}"></td>
+    `;
+
+    tbody.appendChild(tr);
+
+    const inputPlaca = tr.querySelector(`input[list="placas"]`);
+    inputPlaca.addEventListener('change', () => {
+        const placa = inputPlaca.value.trim().toUpperCase();
+        if (placa) {
+            fetch('/salvar_placa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `placa=${encodeURIComponent(placa)}`
+            });
+
+            if (index === linhaIndex) {
+                linhaIndex++;
+                criarLinha(linhaIndex);
+            }
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tbody = document.getElementById('corpo-logistica');
+    const ultimasLinhas = tbody.querySelectorAll('tr');
+    const ultimaLinha = ultimasLinhas[ultimasLinhas.length - 1];
+
+    if (ultimaLinha) {
+        const inputPlaca = ultimaLinha.querySelector('input[list="placas"]');
+        if (inputPlaca) {
+            inputPlaca.addEventListener('change', () => {
+                const placa = inputPlaca.value.trim().toUpperCase();
+                if (placa) {
+                    fetch('/salvar_placa', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `placa=${encodeURIComponent(placa)}`
+                    });
+
+                    criarLinha(linhaIndex);
+                    linhaIndex++;
+                }
+            });
+        }
+    }
+});
+
+document.addEventListener('input', function(event) {
+    const input = event.target;
+    const name = input.name;
+
+    if (!name || !name.includes('_')) return;
+
+    const [campo, index] = name.split('_');
+    const linha = input.closest('tr');
+    const placaInput = linha.querySelector('input[list="placas"]');
+    if (!placaInput) return;
+
+    const placa = placaInput.value.trim().toUpperCase();
+    const valor = input.value.trim();
+
+    if (placa) {
+        fetch('/salvar_campo_logistica', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `placa=${encodeURIComponent(placa)}&campo=${encodeURIComponent(campo)}&valor=${encodeURIComponent(valor)}`
+        });
+    }
+});
+</script>
 {% endblock %}

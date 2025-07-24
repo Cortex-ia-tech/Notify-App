@@ -1,5 +1,5 @@
 # app.py
-from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite
+from persist.cache import ler_lembretes_cache, editar_lembrete_cache, sincronizar_cache_com_postgre, inserir_lembrete_cache, inicializar_cache_sqlite, inserir_placa_cache, ler_placas_cache, salvar_campo_logistica, ler_logistica_cache
 from flask import jsonify
 from random import randint
 from flask import Flask, render_template, request, redirect, session, url_for, flash
@@ -491,12 +491,55 @@ app.add_url_rule('/change_password', 'change_password', change_password_route, m
 def logistica():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+    
+    placas = ler_placas_cache()
+    linhas = ler_logistica_cache()
+    return render_template('logistica.html', placas=placas, linhas=linhas)
 
-    # Exemplo: placas simuladas — você vai substituir depois por leitura do SQLite ou Postgre
-    placas = ["ABC-1234", "XYZ-5678", "JKL-9012", "GHI-3456"]
 
-    return render_template('logistica.html', placas=placas)
+@app.route('/salvar_placa', methods=['POST'])
+def salvar_placa():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
 
+    nova_placa = request.form.get('placa', '').strip().upper()
+    if nova_placa:
+        try:
+            inserir_placa_cache(nova_placa)
+            return jsonify({'status': 'ok'})
+        except Exception as e:
+            return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
+    return jsonify({'status': 'erro', 'mensagem': 'Placa vazia'}), 400
+
+
+
+from persist.cache import salvar_campo_logistica
+
+@app.route('/salvar_campo_logistica', methods=['POST'])
+def salvar_campo_logistica_route():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+
+    try:
+        placa = request.form.get('placa', '').strip().upper()
+        campo = request.form.get('campo', '').strip()
+        valor = request.form.get('valor', '').strip()
+
+        print(f"Recebido: placa={placa}, campo={campo}, valor={valor}")
+
+        if placa and campo:
+            salvar_campo_logistica(placa, campo, valor)
+            print("✅ Campo salvo com sucesso")
+            return jsonify({'status': 'ok'})
+        else:
+            print("⚠️ Dados incompletos")
+            return jsonify({'status': 'erro', 'mensagem': 'Dados incompletos'}), 400
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
 
 @app.route('/sincronizar', methods=['POST'])
