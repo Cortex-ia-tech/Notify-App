@@ -79,3 +79,31 @@ th, td {
     text-align: center;   
 }
 
+.cadastro-placa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 20px 0 20px;
+}
+
+.cadastro-placa input {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 200px;
+}
+
+.cadastro-placa a {
+    text-decoration: none;
+    background-color: #28a745;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.cadastro-placa a:hover {
+    background-color: #218838;
+}

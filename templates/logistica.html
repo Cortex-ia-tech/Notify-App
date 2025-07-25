@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+
 <div class="tabela-logistica">
     <table>
         <thead>
@@ -57,6 +58,11 @@
     </table>
 </div>
 
+<div class="cadastro-placa">
+    <input type="text" id="novaPlaca" placeholder="Digite nova placa">
+    <a href="#" id="btnCadastrarPlaca">+ Cadastrar Placa</a>
+</div>
+
 <footer>
     <p>
         Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
@@ -74,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tr = document.createElement('tr');
 
         tr.innerHTML = `
-            <td><input list="placas" name="placa_${index}" placeholder="Digite ou escolha" required></td>
+            <td><input type="text" name="placa_${index}" placeholder="Placa" readonly></td>
             <td><input type="text" name="afericao_${index}"></td>
             <td><input type="text" name="cipp_${index}"></td>
             <td><input type="text" name="civ_${index}"></td>
@@ -91,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function adicionarEventosLinha(tr, index) {
-        const placaInput = tr.querySelector(`input[list="placas"]`);
+        const placaInput = tr.querySelector(`input[name^="placa_"]`);
         const inputs = tr.querySelectorAll('input');
 
         // Ativa salvamento quando os campos mudam (exceto a própria placa)
@@ -105,27 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-
-        // Ao sair do campo placa (blur) ou mudar valor (change)
-        placaInput.addEventListener('change', bloquearPlaca);
-        placaInput.addEventListener('blur', bloquearPlaca);
-
-        function bloquearPlaca() {
-            const placa = placaInput.value.trim().toUpperCase();
-
-            if (placa.length >= 7) {
-                placaInput.value = placa;
-                placaInput.readOnly = true;  // 🔒 bloqueia o campo
-                salvarLinha(tr);
-
-                if (index === linhaIndex) {
-                    linhaIndex++;
-                    criarLinha(linhaIndex);
-                }
-            }
-        }
     }
-
 
     function salvarLinha(tr) {
         const inputs = tr.querySelectorAll('input');
@@ -135,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dados[nome] = input.value.trim();
         });
 
-        if (!dados.placa || dados.placa.length < 8) return;
+        if (!dados.placa || dados.placa.length < 7) return;
 
         console.log("🟡 Salvando dados da linha:", dados);
 
@@ -159,6 +145,45 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#corpo-logistica tr').forEach((tr, index) => {
         adicionarEventosLinha(tr, index);
     });
+
+    // === NOVO: lógica do botão "Cadastrar Placa" ===
+    const botaoCadastrar = document.getElementById('btnCadastrarPlaca');
+    const campoPlaca = document.getElementById('novaPlaca');
+
+    botaoCadastrar.addEventListener('click', (e) => {
+        e.preventDefault();
+        const novaPlaca = campoPlaca.value.trim().toUpperCase();
+        if (novaPlaca.length >= 7) {
+            criarLinhaComPlaca(novaPlaca);
+            campoPlaca.value = '';
+        } else {
+            alert("Digite uma placa válida com pelo menos 7 caracteres.");
+        }
+    });
+
+    function criarLinhaComPlaca(placa) {
+        const tbody = document.getElementById('corpo-logistica');
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td><input type="text" name="placa_${linhaIndex}" value="${placa}" readonly></td>
+            <td><input type="text" name="afericao_${linhaIndex}"></td>
+            <td><input type="text" name="cipp_${linhaIndex}"></td>
+            <td><input type="text" name="civ_${linhaIndex}"></td>
+            <td><input type="text" name="tacografo_${linhaIndex}"></td>
+            <td><input type="text" name="aet_federal_${linhaIndex}"></td>
+            <td><input type="text" name="aet_bahia_${linhaIndex}"></td>
+            <td><input type="text" name="aet_goias_${linhaIndex}"></td>
+            <td><input type="text" name="aet_alagoas_${linhaIndex}"></td>
+            <td><input type="text" name="aet_minas_gerais_${linhaIndex}"></td>
+        `;
+
+        tbody.appendChild(tr);
+        adicionarEventosLinha(tr, linhaIndex);
+        salvarLinha(tr);
+        linhaIndex++;
+    }
 });
 </script>
+
 {% endblock %}
