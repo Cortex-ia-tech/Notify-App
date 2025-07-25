@@ -27,7 +27,7 @@
             {% if linhas %}
                 {% for linha in linhas %}
                 <tr>
-                    <td><input list="placas" name="placa_{{ loop.index0 }}" value="{{ linha.placa }}"></td>
+                    <td><input list="placas" name="placa_{{ loop.index0 }}" value="{{ linha.placa }}"readonly></td>
                     <td><input type="text" name="afericao_{{ loop.index0 }}" value="{{ linha.afericao or '' }}"></td>
                     <td><input type="text" name="cipp_{{ loop.index0 }}" value="{{ linha.cipp or '' }}"></td>
                     <td><input type="text" name="civ_{{ loop.index0 }}" value="{{ linha.civ or '' }}"></td>
@@ -41,7 +41,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td><input list="placas" name="placa_0" placeholder="Digite ou escolha"></td>
+                    <td><input list="placas" name="placa_0"readonly></td>
                     <td><input type="text" name="afericao_0"></td>
                     <td><input type="text" name="cipp_0"></td>
                     <td><input type="text" name="civ_0"></td>
@@ -56,12 +56,6 @@
         </tbody>
     </table>
 </div>
-
-<datalist id="placas">
-    {% for placa in placas %}
-    <option value="{{ placa }}">
-    {% endfor %}
-</datalist>
 
 <footer>
     <p>
