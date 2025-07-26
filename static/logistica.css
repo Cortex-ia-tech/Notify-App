@@ -22,7 +22,7 @@ table {
     width: auto;
     min-width: unset;
     border-collapse: separate;
-    border-spacing: 0 12px;
+    border-spacing: 0 6px;
 }
 
 th {
@@ -36,8 +36,8 @@ th {
 }
 
 td {
-    background: #f9f9f9;
-    padding: 10px;
+    background: #f7f7f7;
+    padding: 5px;
     border-radius: 10px;
     white-space: nowrap;
 }
@@ -47,8 +47,8 @@ input[type="date"],
 input[type="text"],
 input[list] {
     width: 100%;
-    padding: 8px;
-    border-radius: 8px;
+    padding: 5px;
+    border-radius: 6px;
     border: 1px solid #a8a8a8;
     font-size: 1rem;
     box-sizing: border-box;
@@ -106,4 +106,16 @@ th, td {
 
 .cadastro-placa a:hover {
     background-color: #218838;
+}
+
+.input-invalido {
+    background-color: #ffe5e5 !important;
+    border: 1px solid #cc0000 !important;
+}
+
+.mensagem-erro {
+    font-size: 0.75rem;
+    color: #cc0000;
+    margin-top: 4px;
+    display: block;
 }

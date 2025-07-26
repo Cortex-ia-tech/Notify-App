@@ -491,8 +491,8 @@ def logistica():
         # Lê todas as linhas da tabela logistica (Supabase)
         cur.execute("""
             SELECT placa, afericao, cipp, civ, tacografo,
-                   aet_federal, aet_bahia, aet_goias,
-                   aet_alagoas, aet_minas_gerais
+                   aetfederal, aetbahia, aetgoias,
+                   aetalagoas, aetminasgerais
             FROM logistica
             ORDER BY placa
         """)
@@ -506,11 +506,11 @@ def logistica():
                 'cipp': row[2],
                 'civ': row[3],
                 'tacografo': row[4],
-                'aet_federal': row[5],
-                'aet_bahia': row[6],
-                'aet_goias': row[7],
-                'aet_alagoas': row[8],
-                'aet_minas_gerais': row[9]
+                'aetfederal': row[5],
+                'aetbahia': row[6],
+                'aetgoias': row[7],
+                'aetalagoas': row[8],
+                'aetminasgerais': row[9]
             }
             for row in resultados
         ]
@@ -592,8 +592,8 @@ def salvar_linha_logistica():
 
         campos = [
             'afericao', 'cipp', 'civ', 'tacografo',
-            'aet_federal', 'aet_bahia', 'aet_goias',
-            'aet_alagoas', 'aet_minas_gerais'
+            'aetfederal', 'aetbahia', 'aetgoias',
+            'aetalagoas', 'aetminasgerais'
         ]
 
         valores = [dados.get(campo, '').strip() for campo in campos]

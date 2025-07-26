@@ -33,11 +33,11 @@
                     <td><input type="text" name="cipp_{{ loop.index0 }}" value="{{ linha.cipp or '' }}"></td>
                     <td><input type="text" name="civ_{{ loop.index0 }}" value="{{ linha.civ or '' }}"></td>
                     <td><input type="text" name="tacografo_{{ loop.index0 }}" value="{{ linha.tacografo or '' }}"></td>
-                    <td><input type="text" name="aet_federal_{{ loop.index0 }}" value="{{ linha.aet_federal or '' }}"></td>
-                    <td><input type="text" name="aet_bahia_{{ loop.index0 }}" value="{{ linha.aet_bahia or '' }}"></td>
-                    <td><input type="text" name="aet_goias_{{ loop.index0 }}" value="{{ linha.aet_goias or '' }}"></td>
-                    <td><input type="text" name="aet_alagoas_{{ loop.index0 }}" value="{{ linha.aet_alagoas or '' }}"></td>
-                    <td><input type="text" name="aet_minas_gerais_{{ loop.index0 }}" value="{{ linha.aet_minas_gerais or '' }}"></td>
+                    <td><input type="text" name="aetfederal_{{ loop.index0 }}" value="{{ linha.aetfederal or '' }}"></td>
+                    <td><input type="text" name="aetbahia_{{ loop.index0 }}" value="{{ linha.aetbahia or '' }}"></td>
+                    <td><input type="text" name="aetgoias_{{ loop.index0 }}" value="{{ linha.aetgoias or '' }}"></td>
+                    <td><input type="text" name="aetalagoas_{{ loop.index0 }}" value="{{ linha.aetalagoas or '' }}"></td>
+                    <td><input type="text" name="aetminasgerais_{{ loop.index0 }}" value="{{ linha.aetminasgerais or '' }}"></td>
                 </tr>
                 {% endfor %}
             {% else %}
@@ -47,11 +47,11 @@
                     <td><input type="text" name="cipp_0"></td>
                     <td><input type="text" name="civ_0"></td>
                     <td><input type="text" name="tacografo_0"></td>
-                    <td><input type="text" name="aet_federal_0"></td>
-                    <td><input type="text" name="aet_bahia_0"></td>
-                    <td><input type="text" name="aet_goias_0"></td>
-                    <td><input type="text" name="aet_alagoas_0"></td>
-                    <td><input type="text" name="aet_minas_gerais_0"></td>
+                    <td><input type="text" name="aetfederal_0"></td>
+                    <td><input type="text" name="aetbahia_0"></td>
+                    <td><input type="text" name="aetgoias_0"></td>
+                    <td><input type="text" name="aetalagoas_0"></td>
+                    <td><input type="text" name="aetminasgerais_0"></td>
                 </tr>
             {% endif %}
         </tbody>
@@ -75,6 +75,100 @@
 document.addEventListener('DOMContentLoaded', () => {
     let linhaIndex = {{ linhas|length if linhas else 1 }}; 
 
+    function aplicarMascaraData(input) {
+        input.addEventListener('input', function () {
+            input.classList.remove('input-invalido');
+
+            let valor = input.value.replace(/\D/g, '').slice(0, 8);
+            let formatado = '';
+            if (valor.length > 0) formatado += valor.slice(0, 2);
+            if (valor.length >= 3) formatado += '/' + valor.slice(2, 4);
+            if (valor.length >= 5) formatado += '/' + valor.slice(4, 8);
+            input.value = formatado;
+        });
+
+        input.addEventListener('blur', function () {
+            const valor = input.value.trim();
+
+            // Remove mensagem de erro anterior
+            const erroExistente = input.parentElement.querySelector('.mensagem-erro');
+            if (erroExistente) erroExistente.remove();
+
+            // Se campo vazio, limpa tudo
+            if (valor === '') {
+                input.classList.remove('input-invalido');
+                return;
+            }
+
+            const regexData = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            const match = valor.match(regexData);
+            if (!match) {
+                mostrarErro(input, 'Formato inválido. Use dd/mm/aaaa');
+                return;
+            }
+
+            const [_, dia, mes, ano] = match.map(Number);
+            const data = new Date(ano, mes - 1, dia);
+            const hoje = new Date();
+            const max = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            max.setFullYear(hoje.getFullYear() + 5);
+
+            const invalida = (
+                data.getDate() !== dia ||
+                data.getMonth() !== mes - 1 ||
+                data.getFullYear() !== ano ||
+                data < hoje ||
+                data > max
+            );
+
+            if (invalida) {
+                mostrarErro(input, 'Data inválida ou fora do intervalo permitido');
+            } else {
+                input.classList.remove('input-invalido');
+            }
+        });
+
+
+        // ✅ Validação imediata ao carregar a página
+        function validarValorInicial(valor) {
+            const regexData = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            const match = valor.match(regexData);
+            if (!valor || !match) return false;
+
+            const [_, dia, mes, ano] = match.map(Number);
+            const data = new Date(ano, mes - 1, dia);
+            const hoje = new Date();
+            const max = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            max.setFullYear(hoje.getFullYear() + 5);
+
+            const invalida = (
+                data.getDate() !== dia ||
+                data.getMonth() !== mes - 1 ||
+                data.getFullYear() !== ano ||
+                data < hoje ||
+                data > max
+            );
+
+            return invalida;
+        }
+
+        if (validarValorInicial(input.value.trim())) {
+            input.classList.add('input-invalido');
+        }
+    }
+
+    function mostrarErro(input, mensagem) {
+        input.classList.add('input-invalido');
+
+        const span = document.createElement('span');
+        span.className = 'mensagem-erro';
+        span.innerText = mensagem;
+
+        input.parentElement.appendChild(span);
+    }
+
     function criarLinha(index) {
         const tbody = document.getElementById('corpo-logistica');
         const tr = document.createElement('tr');
@@ -85,11 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><input type="text" name="cipp_${index}"></td>
             <td><input type="text" name="civ_${index}"></td>
             <td><input type="text" name="tacografo_${index}"></td>
-            <td><input type="text" name="aet_federal_${index}"></td>
-            <td><input type="text" name="aet_bahia_${index}"></td>
-            <td><input type="text" name="aet_goias_${index}"></td>
-            <td><input type="text" name="aet_alagoas_${index}"></td>
-            <td><input type="text" name="aet_minas_gerais_${index}"></td>
+            <td><input type="text" name="aetfederal_${index}"></td>
+            <td><input type="text" name="aetbahia_${index}"></td>
+            <td><input type="text" name="aetgoias_${index}"></td>
+            <td><input type="text" name="aetalagoas_${index}"></td>
+            <td><input type="text" name="aetminas_gerais_${index}"></td>
         `;
 
         tbody.appendChild(tr);
@@ -100,8 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const placaInput = tr.querySelector(`input[name^="placa_"]`);
         const inputs = tr.querySelectorAll('input');
 
-        // Ativa salvamento quando os campos mudam (exceto a própria placa)
         inputs.forEach(input => {
+            const nomeCampo = input.name.split('_')[0];
+
+            // Ativa salvamento quando os campos mudam (exceto a própria placa)
             if (input !== placaInput) {
                 input.addEventListener('input', () => {
                     const placa = placaInput.value.trim().toUpperCase();
@@ -110,6 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            // Aplica máscara de data se for um dos campos específicos
+            
+            if (nomeCampo !== 'placa') {
+                aplicarMascaraData(input);
+}
         });
     }
 
@@ -141,12 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Adiciona eventos nas linhas já existentes
+    // Aplica eventos nas linhas existentes
     document.querySelectorAll('#corpo-logistica tr').forEach((tr, index) => {
         adicionarEventosLinha(tr, index);
     });
 
-    // === NOVO: lógica do botão "Cadastrar Placa" ===
+    // Botão de cadastrar nova placa
     const botaoCadastrar = document.getElementById('btnCadastrarPlaca');
     const campoPlaca = document.getElementById('novaPlaca');
 
@@ -157,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
             criarLinhaComPlaca(novaPlaca);
             campoPlaca.value = '';
         } else {
-            alert("Digite uma placa válida com pelo menos 7 caracteres.");
+            //alert("Digite uma placa válida com pelo menos 7 caracteres.");
         }
     });
 
@@ -171,11 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><input type="text" name="cipp_${linhaIndex}"></td>
             <td><input type="text" name="civ_${linhaIndex}"></td>
             <td><input type="text" name="tacografo_${linhaIndex}"></td>
-            <td><input type="text" name="aet_federal_${linhaIndex}"></td>
-            <td><input type="text" name="aet_bahia_${linhaIndex}"></td>
-            <td><input type="text" name="aet_goias_${linhaIndex}"></td>
-            <td><input type="text" name="aet_alagoas_${linhaIndex}"></td>
-            <td><input type="text" name="aet_minas_gerais_${linhaIndex}"></td>
+            <td><input type="text" name="aetfederal_${linhaIndex}"></td>
+            <td><input type="text" name="aetbahia_${linhaIndex}"></td>
+            <td><input type="text" name="aetgoias_${linhaIndex}"></td>
+            <td><input type="text" name="aetalagoas_${linhaIndex}"></td>
+            <td><input type="text" name="aetminas_gerais_${linhaIndex}"></td>
         `;
 
         tbody.appendChild(tr);
@@ -185,5 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
 
 {% endblock %}
