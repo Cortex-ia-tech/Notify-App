@@ -2,10 +2,11 @@ body {
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     background: #f4f4f4;
-    padding: 80px 20px 20px 20px; /* Reduz padding inferior */
+    padding: 80px 20px 20px 20px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding-top: 140px;
 }
 
 .tabela-logistica {
@@ -23,10 +24,11 @@ table {
     min-width: unset;
     border-collapse: separate;
     border-spacing: 0 6px;
+    margin: 0 auto;
 }
 
 th {
-    text-align: left;
+    text-align: center;
     padding: 10px;
     background: #28a745;
     color: white;
@@ -40,24 +42,34 @@ td {
     padding: 5px;
     border-radius: 10px;
     white-space: nowrap;
+    text-align: center;
 }
 
-select,
-input[type="date"],
-input[type="text"],
-input[list] {
-    width: 100%;
-    padding: 5px;
+/* Estilo padronizado para todos os inputs da tabela */
+.tabela-logistica input[type="text"],
+.tabela-logistica input[list],
+.tabela-logistica select,
+.tabela-logistica input[type="date"] {
+    width: 100px;
+    max-width: 100px;
+    min-width: 100px;
+    padding: 4px 6px;
     border-radius: 6px;
     border: 1px solid #a8a8a8;
-    font-size: 1rem;
+    font-size: 0.9rem;
     box-sizing: border-box;
+    text-align: center;
+}
+
+/* Garante largura das colunas da tabela */
+th, td {
+    width: 130px;
+    max-width: 130px;
     text-align: center;
 }
 
 footer {
     margin-top: 10px;
-    /*padding: 20px;*/
     text-align: center;
     font-size: 0.85rem;
     color: #666;
@@ -66,17 +78,10 @@ footer {
     border-radius: 8px;
 }
 
-
 .conteudo-principal {
     flex: 1;
     display: flex;
     flex-direction: column;
-}
-
-th, td {
-    width: 130px;         
-    max-width: 130px;
-    text-align: center;   
 }
 
 .cadastro-placa {
@@ -118,4 +123,33 @@ th, td {
     color: #cc0000;
     margin-top: 4px;
     display: block;
+}
+
+
+.cabecalho-tabela-fixo {
+    position: fixed;
+    top: 80px; /* ajuste se houver menu superior */
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: white;
+    padding: 0 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.cabecalho-tabela-fixo table {
+    width: auto;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.cabecalho-tabela-fixo th {
+    background: #28a745;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 130px;
+    text-align: center;
 }
