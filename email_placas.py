@@ -32,12 +32,16 @@ CAMPOS_DOCUMENTOS = {
 }
 
 # --- FUNÇÃO PARA ENVIAR E-MAIL ---
-def enviar_email(documento, placa, dias):
-    assunto = f"Lembrete 🗖 {documento} – {placa} - Faltam {dias} dias"
-    corpo = f"""
+def enviar_email(documento, placa, dias, data_vencimento):
+    data_formatada = data_vencimento.strftime('%d/%m/%Y')
+    hoje = datetime.today().date().strftime('%d/%m/%Y')
+
+    if dias in [30, 15]:
+        assunto = f"Lembrete 🗖 {documento} – {placa} - Vence em {dias} dias."
+        corpo = f"""
 Olá,
 
-Faltam {dias} DIAS para o documento {documento} do veículo {placa}.
+Faltam {dias} dias para o vencimento do documento {documento} do veículo {placa} (vence em {data_formatada}).
 
 Você optou por ser avisado(a) com {dias} dias de antecedência.
 
@@ -46,6 +50,37 @@ Acesse o Notify para atualizar suas preferências.
 -- 
 Notify | Uma criação Cortex-ia Business Intelligence®
 """
+    elif dias == 0:
+        assunto = f"Lembrete 🗖 {documento} – {placa} - Vencendo HOJE, ({hoje})."
+        corpo = f"""
+Olá,
+
+O documento {documento} do veículo {placa} está vencendo HOJE.
+
+Você optou por ser avisado(a) com 0 dias de antecedência.
+
+Acesse o Notify para atualizar suas preferências.
+
+-- 
+Notify | Uma criação Cortex-ia Business Intelligence®
+"""
+    elif dias == -1:
+        assunto = f"Lembrete 🗖 {documento} – {placa} - VENCIDO."
+        corpo = f"""
+Olá,
+
+O documento {documento} do veículo {placa} está VENCIDO (venceu ontem, {data_formatada}).
+
+Você optou por ser avisado(a) com -1 dias de antecedência.
+
+Acesse o Notify para atualizar suas preferências.
+
+-- 
+Notify | Uma criação Cortex-ia Business Intelligence®
+"""
+    else:
+        return  # Não envia se não for um dos dias desejados
+
     msg = MIMEMultipart()
     msg['From'] = EMAIL_REMETENTE
     msg['To'] = EMAIL_DESTINATARIO
@@ -87,7 +122,7 @@ def verificar_vencimentos():
                 if data:
                     dias_restantes = (data - hoje).days
                     if dias_restantes in dias_alvo:
-                        enviar_email(CAMPOS_DOCUMENTOS[campo], placa, dias_restantes)
+                        enviar_email(CAMPOS_DOCUMENTOS[campo], placa, dias_restantes, data)
 
         cur.close()
         conn.close()
