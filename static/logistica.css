@@ -1,155 +1,138 @@
+/* logistica.css */
+
 body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    background: #f4f4f4;
-    padding: 80px 20px 20px 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding-top: 140px;
+    /* Garante que o conteúdo comece abaixo da barra de menu fixa */
+    padding-top: 60px;
+    margin: 0; /* Remove margens padrão do body */
+    font-family: Arial, sans-serif; /* Define uma fonte padrão */
+    /* Adicione estas linhas para habilitar a rolagem da página no body */
+    height: 100%; /* Garante que o body ocupe toda a altura */
+    overflow-y: auto; /* Habilita a rolagem vertical no body */
 }
 
-.tabela-logistica {
-    margin-left: 10px;
-    margin-right: 10px;
-    overflow-x: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+/* Opcional: Estilo para a barra de menu se ela não estiver em base.css */
+/* Se a barra de menu já estiver estilizada e fixa, não precisa deste bloco */
+/* .menu-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background-color: #333;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+} */
+
+/* Contêiner da tabela: removemos as propriedades de rolagem interna */
+.table-container {
+    /* REMOVIDO: height: 600px; */
+    /* REMOVIDO: overflow-y: auto; */
+    position: relative; /* Mantém, pois é bom para o contexto da tabela */
+    /* Adicione padding ou margem se precisar de espaço entre o menu e a tabela */
+    /* padding: 10px; */
 }
 
 table {
-    width: auto;
-    min-width: unset;
-    border-collapse: separate;
-    border-spacing: 0 6px;
-    margin: 0 auto;
+    width: 100%;
+    border-collapse: collapse; /* Colapsa as bordas das células */
+    table-layout: fixed; /* Ajuda a manter a largura das colunas, evitando que se ajustem ao conteúdo */
 }
 
-th {
-    text-align: center;
-    padding: 10px;
-    background: #28a745;
-    color: white;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    white-space: nowrap;
-}
-
-td {
-    background: #f7f7f7;
-    padding: 5px;
-    border-radius: 10px;
-    white-space: nowrap;
-    text-align: center;
-}
-
-/* Estilo padronizado para todos os inputs da tabela */
-.tabela-logistica input[type="text"],
-.tabela-logistica input[list],
-.tabela-logistica select,
-.tabela-logistica input[type="date"] {
-    width: 100px;
-    max-width: 100px;
-    min-width: 100px;
-    padding: 4px 6px;
-    border-radius: 6px;
-    border: 1px solid #a8a8a8;
-    font-size: 0.9rem;
-    box-sizing: border-box;
-    text-align: center;
-}
-
-/* Garante largura das colunas da tabela */
 th, td {
-    width: 130px;
-    max-width: 130px;
+    padding: 12px 15px; /* Padding interno das células */
+    border: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap; /* Impede que o texto quebre linhas nas células */
+    overflow: hidden; /* Oculta o conteúdo que excede a largura da célula */
+    text-overflow: ellipsis; /* Adiciona '...' para texto oculto */
+}
+
+thead th {
+    background-color: #f2f2f2; /* Cor de fundo para o cabeçalho */
+    position: sticky; /* Fixa o cabeçalho, mas agora em relação à viewport/body */
+    top: 60px; /* ESSENCIAL: Fixa o cabeçalho abaixo da barra de menu (60px) */
+    z-index: 1; /* Garante que o cabeçalho fique sobre o conteúdo ao rolar */
     text-align: center;
 }
 
-footer {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 0.85rem;
-    color: #666;
-    background-color: #f9f9f9;
-    border-top: 1px solid #ddd;
-    border-radius: 8px;
+/* **AJUSTADO**: Largura específica para a coluna 'Placa' */
+thead th:first-child { /* Seleciona o primeiro th dentro do thead */
+    width: 120px; /* Defina a largura desejada para a coluna da placa. Ex: 120px */
 }
 
-.conteudo-principal {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Estilo para linhas pares */
 }
 
-.cadastro-placa {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 10px 20px 0 20px;
+tbody tr:hover {
+    background-color: #f1f1f1; /* Estilo ao passar o mouse sobre as linhas */
 }
 
-.cadastro-placa input {
-    padding: 8px;
-    font-size: 1rem;
+/* **AJUSTADO**: Estilos para TODOS os inputs dentro da tabela */
+table input { 
+    width: 100%; /* Ajusta a largura do input para preencher a célula */
+    padding: 5px;
+    box-sizing: border-box; /* Inclui padding e borda no cálculo da largura */
     border: 1px solid #ccc;
-    border-radius: 8px;
-    width: 200px;
+    border-radius: 4px;
+    min-width: 0; /* Permite que o input encolha até o mínimo necessário pela célula */
+    text-align: center;
 }
 
-.cadastro-placa a {
-    text-decoration: none;
-    background-color: #28a745;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: background-color 0.2s ease;
-}
-
-.cadastro-placa a:hover {
-    background-color: #218838;
-}
-
+/* Estilo para inputs inválidos e mensagens de erro */
 .input-invalido {
-    background-color: #ffe5e5 !important;
-    border: 1px solid #cc0000 !important;
+    border-color: red !important;
 }
 
 .mensagem-erro {
-    font-size: 0.75rem;
-    color: #cc0000;
-    margin-top: 4px;
-    display: block;
+    color: red;
+    font-size: 0.8em;
+    display: block; /* Garante que a mensagem apareça em nova linha */
+    margin-top: 2px;
 }
 
-
-.cabecalho-tabela-fixo {
-    position: fixed;
-    top: 80px; /* ajuste se houver menu superior */
-    left: 0;
-    right: 0;
-    z-index: 10;
-    background: white;
-    padding: 0 20px;
-    border-bottom: 1px solid #ccc;
-}
-
-.cabecalho-tabela-fixo table {
-    width: auto;
-    margin: 0 auto;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.cabecalho-tabela-fixo th {
-    background: #28a745;
-    color: white;
+/* Estilos para a seção de cadastro de placa */
+.cadastro-placa {
+    margin: 20px 0;
     padding: 10px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    width: 130px;
+    background-color: #e6f7ff;
+    border: 1px solid #99d9f7;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cadastro-placa input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-grow: 1;
+    max-width: 120px; /* Esta é para o input de cadastro de placa, fora da tabela */
+}
+
+.cadastro-placa #btnCadastrarPlaca {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.cadastro-placa #btnCadastrarPlaca:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para o footer */
+footer {
+    margin-top: 30px;
+    padding: 20px;
     text-align: center;
+    color: #666;
+    font-size: 0.9em;
+    border-top: 1px solid #eee;
 }
