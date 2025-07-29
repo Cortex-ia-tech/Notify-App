@@ -621,6 +621,33 @@ def salvar_linha_logistica():
         traceback.print_exc()
         return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
+@app.route('/excluir_placa', methods=['POST'])
+def excluir_placa():
+    if not current_user.is_authenticated:
+        return jsonify({'status': 'erro', 'mensagem': 'Usuário não autenticado'}), 401
+
+    try:
+        dados = request.get_json()
+        placa = dados.get('placa', '').strip().upper()
+
+        if not placa:
+            return jsonify({'status': 'erro', 'mensagem': 'Placa não informada'}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM logistica WHERE placa = %s", (placa,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({'status': 'ok', 'mensagem': f'Placa {placa} excluída com sucesso.'})
+
+    except Exception as e:
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

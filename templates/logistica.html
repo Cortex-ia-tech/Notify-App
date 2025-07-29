@@ -57,13 +57,36 @@
         </table>
     </div>
 <div class="cadastro-placa">
-    <input type="text" id="novaPlaca" placeholder="Digite nova placa">
+    <input type="text" id="novaPlaca" placeholder="Nova placa" maxlength="8" style="text-transform: uppercase;">
     <a href="#" id="btnCadastrarPlaca">+ Cadastrar Placa</a>
+    <span id="mensagemErroPlaca" style="color: red; font-size: 0.9em; margin-left: 10px;"></span>
+</div>
+
+<div class="cadastro-placa">
+    <button id="abrirExclusao">🗑️ Excluir uma placa</button>
+</div>
+
+
+<div id="modalExclusao" style="display: none;" class="modal-fundo">
+    <div class="modal-conteudo">
+        <h3>Selecione uma placa para excluir:</h3>
+        <select id="placaParaExcluir">
+            <option value="">-- Escolha uma placa --</option>
+            {% for placa in placas %}
+            <option value="{{ placa }}">{{ placa }}</option>
+            {% endfor %}
+        </select>
+        <div class="modal-botoes">
+            <button id="confirmarExclusao">Excluir</button>
+            <button id="cancelarExclusao">Cancelar</button>
+        </div>
+    </div>
 </div>
 
 <footer>
     <p>
-        Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence® <br> Todos os direitos reservados.
+        Notify 2025 – Desenvolvido por Cortex-IA Business Intelligence<sup style="font-size: 0.5em;">®</sup> <br>
+        Todos os direitos reservados.
     </p>
 </footer>
 {% endblock %}
@@ -253,12 +276,24 @@ document.addEventListener('DOMContentLoaded', () => {
     botaoCadastrar.addEventListener('click', (e) => {
         e.preventDefault();
         const novaPlaca = campoPlaca.value.trim().toUpperCase();
-        if (novaPlaca.length >= 7) {
-            criarLinhaComPlaca(novaPlaca);
-            campoPlaca.value = '';
-        } else {
-            //alert("Digite uma placa válida com pelo menos 7 caracteres.");
+        const mensagemErro = document.getElementById('mensagemErroPlaca');
+        mensagemErro.textContent = '';
+
+        if (novaPlaca.length < 7) {
+            mensagemErro.textContent = 'Placa inválida.';
+            return;
         }
+
+        const placasExistentes = Array.from(document.querySelectorAll('input[name^="placa_"]'))
+            .map(input => input.value.trim().toUpperCase());
+
+        if (placasExistentes.includes(novaPlaca)) {
+            mensagemErro.textContent = `A placa ${novaPlaca} já existe.`;
+            return;
+        }
+
+        criarLinhaComPlaca(novaPlaca);
+        campoPlaca.value = '';
     });
 
     function criarLinhaComPlaca(placa) {
@@ -283,6 +318,46 @@ document.addEventListener('DOMContentLoaded', () => {
         salvarLinha(tr);
         linhaIndex++;
     }
+
+    document.getElementById('abrirExclusao').addEventListener('click', () => {
+    document.getElementById('modalExclusao').style.display = 'flex';
+});
+
+document.getElementById('cancelarExclusao').addEventListener('click', () => {
+    document.getElementById('modalExclusao').style.display = 'none';
+});
+
+
+document.getElementById('confirmarExclusao').addEventListener('click', () => {
+    const placaSelecionada = document.getElementById('placaParaExcluir').value;
+    if (!placaSelecionada) {
+        alert("Selecione uma placa.");
+        return;
+    }
+
+    if (confirm(`Tem certeza que deseja excluir a placa ${placaSelecionada}?`)) {
+        fetch(`/excluir_placa`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ placa: placaSelecionada })
+        })
+        .then(res => res.json())
+        .then(res => {
+            alert(res.mensagem || "Placa excluída com sucesso.");
+            location.reload();
+        })
+        .catch(err => {
+            alert("Erro ao excluir placa.");
+            console.error(err);
+        });
+    }
+});
+
+
+
+
 });
 </script>
 {% endblock %}
