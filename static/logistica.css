@@ -2,7 +2,7 @@
 
 body {
     /* Garante que o conteúdo comece abaixo da barra de menu fixa */
-    padding-top: 60px;
+    padding-top: 55px;
     margin: 0; /* Remove margens padrão do body */
     font-family: Arial, sans-serif; /* Define uma fonte padrão */
     /* Adicione estas linhas para habilitar a rolagem da página no body */
@@ -53,9 +53,13 @@ th, td {
 thead th {
     background-color: #d4ffc3; /* Cor de fundo para o cabeçalho */
     position: sticky; /* Fixa o cabeçalho, mas agora em relação à viewport/body */
-    top: 60px; /* ESSENCIAL: Fixa o cabeçalho abaixo da barra de menu (60px) */
+    top: 55px; /* ESSENCIAL: Fixa o cabeçalho abaixo da barra de menu (60px) */
     z-index: 1; /* Garante que o cabeçalho fique sobre o conteúdo ao rolar */
     text-align: center;
+    height: 20px;
+    font-family:Arial, Helvetica, sans-serif;
+    color: #006809;
+    
 }
 
 /* **AJUSTADO**: Largura específica para a coluna 'Placa' */
