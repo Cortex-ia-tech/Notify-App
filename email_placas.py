@@ -37,7 +37,7 @@ def enviar_email(documento, placa, dias, data_vencimento):
     hoje = datetime.today().date().strftime('%d/%m/%Y')
 
     if dias in [30, 15]:
-        assunto = f"Lembrete 🗖 {documento} – {placa} - Vence em {dias} dias."
+        assunto = f"Lembrete 📆 {documento} – {placa} - Vence em {dias} dias."
         corpo = f"""
 Olá,
 
@@ -51,7 +51,7 @@ Acesse o Notify para atualizar suas preferências.
 Notify | Uma criação Cortex-ia Business Intelligence®
 """
     elif dias == 0:
-        assunto = f"Lembrete 🗖 {documento} – {placa} - Vencendo HOJE, ({hoje})."
+        assunto = f"Lembrete 📆 {documento} – {placa} - Vencendo HOJE, ({hoje})."
         corpo = f"""
 Olá,
 
@@ -65,7 +65,7 @@ Acesse o Notify para atualizar suas preferências.
 Notify | Uma criação Cortex-ia Business Intelligence®
 """
     elif dias == -1:
-        assunto = f"Lembrete 🗖 {documento} – {placa} - VENCIDO."
+        assunto = f"Lembrete 📆 {documento} – {placa} - VENCIDO."
         corpo = f"""
 Olá,
 
